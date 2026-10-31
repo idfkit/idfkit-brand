@@ -14,8 +14,9 @@ Six assertions, each a function returning typed findings:
   4. No identity-bearing file carries a colour literal, a font family, a font face or a font host,
      outside the vendored paths and outside a line marked `identity-exception: <part>` that matches
      an exception in the roster.
-  5. For a readme touchpoint, the root README conforms to readme-header.md, its sentence equals the
-     roster's, and a library README keeps its parity statement.
+  5. For a readme touchpoint, the README conforms to readme-header.md, its sentence equals the
+     roster's, a library README keeps its parity statement, and a README an index shows links no
+     retired host.
   6. A host loads its generated lockup.css from the file `lockup_at` names, and no identity-bearing
      file draws the mark by hand.
 
@@ -38,7 +39,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from models import LEVEL_PATTERN, MECHANISMS, Roster, Touchpoint, load_roster
+from models import LEVEL_PATTERN, MECHANISMS, RETIRED_HOSTS, Roster, Touchpoint, load_roster
 from rasters import RasterError, compare_ico, compare_png
 
 STANDARD_ROOT = Path(__file__).resolve().parent.parent
@@ -416,7 +417,12 @@ def check_literals(root: Path, entry: Touchpoint, dist: Path | None = None) -> l
 # 5. The README header
 
 
-BADGES_BY_KIND: dict[str, int] = {"library": 5, "service": 3, "site": 2, "plugin": 2, "profile": 0}
+BADGES_BY_KIND: dict[str, int] = {"library": 5, "service": 3, "site": 2, "plugin": 2, "profile": 0, "package": 0}
+# A link is an address with its scheme, in any form a renderer resolves. Prose naming a host without
+# one is permitted, which is how a README says that a host is retired (FR-033c).
+RETIRED_LINK = re.compile(
+    r"(?:https?:)?//(" + "|".join(re.escape(h) for h in RETIRED_HOSTS) + r")(?![\w.-])", re.IGNORECASE
+)
 LABELS: tuple[str, ...] = ("idfkit", "Developers", "EnergyPlus docs", "Envelop", "MCP", "Shoebox", "GitHub")
 
 
@@ -448,9 +454,9 @@ def _check_picture_block(
     block = "\n".join(lines[picture_start : picture_end + 1])
     addresses = re.findall(r'(?:srcset|src)="([^"]+)"', block)
     expected_files = (
-        ("lockup-on-dark.svg", "lockup-on-light.svg", "tile.svg")
+        ("lockup-on-dark.svg", "lockup-on-light.svg", "tile.png")
         if profile
-        else ("mark-on-dark.svg", "mark-on-light.svg", "tile.svg")
+        else ("mark-on-dark.svg", "mark-on-light.svg", "tile.png")
     )
     if len(addresses) != 3:
         findings.append(
@@ -481,6 +487,15 @@ def _check_picture_block(
     return findings, picture_end
 
 
+def _check_retired_links(lines: list[str], file: str) -> list[Finding]:
+    """A README an index or a marketplace shows links no retired host anywhere in the file (FR-033c)."""
+    return [
+        Finding(5, f"links the retired host {match.group(1)}, in a README an index shows (FR-033c)", file, str(number))
+        for number, line in enumerate(lines, start=1)
+        for match in RETIRED_LINK.finditer(line)
+    ]
+
+
 def check_readme(root: Path, entry: Touchpoint, roster: Roster, level: str) -> list[Finding]:
     path = root / entry.declared_at.path
     file = entry.declared_at.path
@@ -490,6 +505,9 @@ def check_readme(root: Path, entry: Touchpoint, roster: Roster, level: str) -> l
     lines = text.splitlines()
     findings: list[Finding] = []
     profile = entry.readme_kind == "profile"
+    package = entry.readme_kind == "package"
+    if entry.indexed:
+        findings += _check_retired_links(lines, file)
     visible = _strip_fences(lines)
     headings = [(number, line) for number, line in visible if re.match(r"^#\s", line)]
     if len(headings) != 1 and not profile:
@@ -514,13 +532,10 @@ def check_readme(root: Path, entry: Touchpoint, roster: Roster, level: str) -> l
                 Finding(5, "the heading follows the picture block", file, str(content[0][0]) if content else None)
             )
         else:
-            name = entry.repository.split("/", 1)[1]
+            name = entry.package_name if package else entry.repository.split("/", 1)[1]
+            names = "package as it is installed" if package else "repository as GitHub names it"
             if content[0][1].strip() != f"# {name}":
-                findings.append(
-                    Finding(
-                        5, f"the heading names the repository as GitHub names it: # {name}", file, str(content[0][0])
-                    )
-                )
+                findings.append(Finding(5, f"the heading names the {names}: # {name}", file, str(content[0][0])))
             cursor = 1
     if len(content) <= cursor:
         return [*findings, Finding(5, "the sentence, the family links and the badge row follow", file)]
@@ -571,6 +586,8 @@ def check_readme(root: Path, entry: Touchpoint, roster: Roster, level: str) -> l
                         str(badge_number),
                     )
                 )
+    if package and len(content) > cursor and re.search(r"!\[[^\]]*\]\([^)]+\)", content[cursor][1]):
+        findings.append(Finding(5, "a package README carries no badge row", file, str(content[cursor][0])))
     if entry.readme_kind == "library":
         # The statement lives below the header, at its own prominence (FR-033); the parity badge is not it.
         parity_lines = [

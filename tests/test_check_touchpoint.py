@@ -257,7 +257,7 @@ def test_a_release_asset_address_fails_because_a_browser_will_not_display_it(
 
 
 def test_every_address_a_readme_may_use_exists_in_marks(root: Path) -> None:
-    for name in ("mark-on-dark.svg", "mark-on-light.svg", "tile.svg", "lockup-on-dark.svg", "lockup-on-light.svg"):
+    for name in ("mark-on-dark.svg", "mark-on-light.svg", "tile.png", "lockup-on-dark.svg", "lockup-on-light.svg"):
         assert (root / "marks" / name).is_file(), name
 
 
@@ -297,9 +297,100 @@ def test_a_readme_at_another_tag_fails_on_its_declaration(
     assert findings[0].assertion == 2 and "different tags" in findings[0].message
 
 
+def _package_readme(tmp_path: Path, fixtures: Path, text: str | None = None) -> Path:
+    root = tmp_path / "idfkit-js"
+    (root / "packages" / "core").mkdir(parents=True)
+    source = (fixtures / "touchpoints" / "package-readme.md").read_text(encoding="utf-8")
+    (root / "packages" / "core" / "README.md").write_text(text if text is not None else source, encoding="utf-8")
+    return root
+
+
+def _package_findings(roster: Roster, root: Path) -> list[ct.Finding]:
+    entry = roster.by_id("package-core")
+    assert entry is not None
+    return ct.check_readme(root, entry, roster, LEVEL)
+
+
+def test_a_conforming_package_readme_passes(tmp_path: Path, fixtures: Path, roster: Roster) -> None:
+    findings = _package_findings(roster, _package_readme(tmp_path, fixtures))
+    assert findings == [], [f.render() for f in findings]
+
+
+def test_a_package_readme_with_a_badge_row_fails(tmp_path: Path, fixtures: Path, roster: Roster) -> None:
+    text = (fixtures / "touchpoints" / "package-readme.md").read_text(encoding="utf-8")
+    text = text.replace(
+        "## Install", "[![Release](https://img.shields.io/npm/v/@idfkit/core)](https://npmjs.com)\n\n## Install"
+    )
+    findings = _package_findings(roster, _package_readme(tmp_path, fixtures, text))
+    assert len(findings) == 1 and findings[0].assertion == 5 and "badge" in findings[0].message
+
+
+def test_a_package_readme_with_the_wrong_heading_fails(tmp_path: Path, fixtures: Path, roster: Roster) -> None:
+    text = (fixtures / "touchpoints" / "package-readme.md").read_text(encoding="utf-8")
+    findings = _package_findings(roster, _package_readme(tmp_path, fixtures, text.replace("# @idfkit/core", "# core")))
+    assert len(findings) == 1 and "@idfkit/core" in findings[0].message and "installed" in findings[0].message
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        "See [the guide](https://js.idfkit.com/guide/).",
+        '<a href="https://py.idfkit.com">the guide</a>',
+        "The guide: <https://js.idfkit.com>",
+        "[guide]: https://js.idfkit.com/guide/",
+    ],
+)
+def test_a_package_readme_linking_a_retired_host_below_its_header_fails(
+    tmp_path: Path, fixtures: Path, roster: Roster, line: str
+) -> None:
+    text = (fixtures / "touchpoints" / "package-readme.md").read_text(encoding="utf-8") + f"\n{line}\n"
+    findings = _package_findings(roster, _package_readme(tmp_path, fixtures, text))
+    assert len(findings) == 1 and "FR-033c" in findings[0].message
+    assert findings[0].place == str(len(text.splitlines()))
+
+
+def test_prose_naming_a_retired_host_as_retired_passes(tmp_path: Path, fixtures: Path, roster: Roster) -> None:
+    text = (fixtures / "touchpoints" / "package-readme.md").read_text(
+        encoding="utf-8"
+    ) + "\n`js.idfkit.com` and py.idfkit.com are retired; [the guide](https://developers.idfkit.com) replaced them.\n"
+    assert _package_findings(roster, _package_readme(tmp_path, fixtures, text)) == []
+
+
+def test_a_root_readme_an_index_shows_may_not_link_a_retired_host(
+    tmp_path: Path, fixtures: Path, roster: Roster, root: Path
+) -> None:
+    touchpoint = tmp_path / "idfkit"
+    touchpoint.mkdir()
+    text = (fixtures / "touchpoints" / "library-readme.md").read_text(encoding="utf-8")
+    (touchpoint / "README.md").write_text(text + "\n[Docs](https://py.idfkit.com)\n", encoding="utf-8")
+    findings = ct.check(roster, "idfkit/idfkit", touchpoint, LEVEL, None, root, "compare", "readme", require_tag=False)
+    assert len(findings) == 1 and "FR-033c" in findings[0].message
+
+
+def test_only_the_root_readmes_an_index_shows_are_scanned_for_retired_hosts(roster: Roster) -> None:
+    shown = {t.id for t in roster.readmes() if t.indexed and t.readme_kind != "package"}
+    assert shown == {"readme-idfkit", "readme-idfkit-mcp", "readme-idfkit-lsp"}
+
+
+@pytest.mark.parametrize("fixture", ["library-readme.md", "package-readme.md"])
+def test_a_header_whose_fallback_is_the_svg_tile_fails(
+    tmp_path: Path, fixtures: Path, roster: Roster, fixture: str
+) -> None:
+    (tmp_path / "packages" / "core").mkdir(parents=True)
+    text = (fixtures / "touchpoints" / fixture).read_text(encoding="utf-8").replace("marks/tile.png", "marks/tile.svg")
+    (tmp_path / "README.md").write_text(text, encoding="utf-8")
+    (tmp_path / "packages" / "core" / "README.md").write_text(text, encoding="utf-8")
+    entry = roster.by_id("readme-idfkit" if fixture.startswith("library") else "package-core")
+    assert entry is not None
+    findings = ct.check_readme(tmp_path, entry, roster, LEVEL)
+    assert len(findings) == 1 and "marks/tile.png" in findings[0].message
+
+
 def test_an_unlisted_repository_fails_membership(tmp_path: Path, roster: Roster, root: Path) -> None:
-    findings = ct.check(roster, "idfkit/idfkit-engine", tmp_path, LEVEL, None, root, "compare", None, require_tag=False)
-    assert findings[0].assertion == 1 and "idfkit-engine" in findings[0].message
+    findings = ct.check(
+        roster, "idfkit/idfkit-mcp-deployment", tmp_path, LEVEL, None, root, "compare", None, require_tag=False
+    )
+    assert findings[0].assertion == 1 and "idfkit-mcp-deployment" in findings[0].message
 
 
 def test_cli(tmp_path: Path, dist: Path, root: Path, capsys: pytest.CaptureFixture[str]) -> None:

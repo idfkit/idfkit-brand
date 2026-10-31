@@ -213,6 +213,7 @@ notes = "The css derivation and hosts/shoebox.idfkit.com/ are placed under ident
 id = "readme-idfkit"
 kind = "readme"
 repository = "idfkit/idfkit"
+indexed = true
 readme_kind = "library"
 sentence = "An EnergyPlus IDF and epJSON toolkit for Python, with no third-party dependencies."
 mechanisms = ["readme"]
@@ -231,6 +232,7 @@ declared_at = { path = "README.md", locator = "idfkit-brand/(identity-[0-9]{4}\\
 id = "readme-idfkit-mcp"
 kind = "readme"
 repository = "idfkit/idfkit-mcp"
+indexed = true
 readme_kind = "service"
 sentence = "An MCP server that lets an AI assistant author, validate and simulate EnergyPlus models with idfkit."
 mechanisms = ["readme"]
@@ -240,6 +242,7 @@ declared_at = { path = "README.md", locator = "idfkit-brand/(identity-[0-9]{4}\\
 id = "readme-idfkit-lsp"
 kind = "readme"
 repository = "idfkit/idfkit-lsp"
+indexed = true
 readme_kind = "service"
 sentence = "A language server and VS Code extension for EnergyPlus development with idfkit."
 mechanisms = ["readme"]
@@ -318,3 +321,137 @@ readme_kind = "profile"
 sentence = "Open-source tooling for EnergyPlus building energy simulation, in Python, TypeScript and the browser."
 mechanisms = ["readme"]
 declared_at = { path = "profile/README.md", locator = "idfkit-brand/(identity-[0-9]{4}\\.[0-9]+)/marks/", form = "image-url" }
+
+# 5. Package READMEs: a published package whose page is not its repository's root README (contract
+# readme-header.md section 7). `package_name` is the name as installed, which the heading shows. A
+# private repository is listed here and nowhere as a root README (FR-033b).
+
+[[touchpoint]]
+id = "package-core"
+kind = "readme"
+repository = "idfkit/idfkit-js"
+readme_kind = "package"
+package_name = "@idfkit/core"
+sentence = "EnergyPlus IDF and epJSON parsing and manipulation for JavaScript."
+mechanisms = ["readme"]
+declared_at = { path = "packages/core/README.md", locator = "idfkit-brand/(identity-[0-9]{4}\\.[0-9]+)/marks/", form = "image-url" }
+
+[[touchpoint]]
+id = "package-geometry"
+kind = "readme"
+repository = "idfkit/idfkit-js"
+readme_kind = "package"
+package_name = "@idfkit/geometry"
+sentence = "Read-only geometry extraction for EnergyPlus models: vectors, polygons and a model's resolved scene."
+mechanisms = ["readme"]
+declared_at = { path = "packages/geometry/README.md", locator = "idfkit-brand/(identity-[0-9]{4}\\.[0-9]+)/marks/", form = "image-url" }
+
+[[touchpoint]]
+id = "package-idfkit"
+kind = "readme"
+repository = "idfkit/idfkit-js"
+readme_kind = "package"
+package_name = "@idfkit/idfkit"
+sentence = "The shared install name for idfkit in JavaScript, re-exporting the scoped packages through subpaths."
+mechanisms = ["readme"]
+declared_at = { path = "packages/idfkit/README.md", locator = "idfkit-brand/(identity-[0-9]{4}\\.[0-9]+)/marks/", form = "image-url" }
+
+[[touchpoint]]
+id = "package-language"
+kind = "readme"
+repository = "idfkit/idfkit-js"
+readme_kind = "package"
+package_name = "@idfkit/language"
+sentence = "The opt-in IDF language service: cursor answers and positioned findings, synchronous and free of I/O."
+mechanisms = ["readme"]
+declared_at = { path = "packages/language/README.md", locator = "idfkit-brand/(identity-[0-9]{4}\\.[0-9]+)/marks/", form = "image-url" }
+
+[[touchpoint]]
+id = "package-schemas"
+kind = "readme"
+repository = "idfkit/idfkit-js"
+readme_kind = "package"
+package_name = "@idfkit/schemas"
+sentence = "Content-addressed EnergyPlus epJSON schemas for every supported version."
+mechanisms = ["readme"]
+declared_at = { path = "packages/schemas/README.md", locator = "idfkit-brand/(identity-[0-9]{4}\\.[0-9]+)/marks/", form = "image-url" }
+
+[[touchpoint]]
+id = "package-types-v26-1"
+kind = "readme"
+repository = "idfkit/idfkit-js"
+readme_kind = "package"
+package_name = "@idfkit/types-v26-1"
+sentence = "Generated TypeScript interfaces and a `TypeMap` for EnergyPlus 26.1.0."
+mechanisms = ["readme"]
+declared_at = { path = "packages/types-v26-1/README.md", locator = "idfkit-brand/(identity-[0-9]{4}\\.[0-9]+)/marks/", form = "image-url" }
+
+[[touchpoint]]
+id = "package-types-v26-2"
+kind = "readme"
+repository = "idfkit/idfkit-js"
+readme_kind = "package"
+package_name = "@idfkit/types-v26-2"
+sentence = "Generated TypeScript interfaces and a `TypeMap` for EnergyPlus 26.2.0."
+mechanisms = ["readme"]
+declared_at = { path = "packages/types-v26-2/README.md", locator = "idfkit-brand/(identity-[0-9]{4}\\.[0-9]+)/marks/", form = "image-url" }
+
+[[touchpoint]]
+id = "package-types-v9-4"
+kind = "readme"
+repository = "idfkit/idfkit-js"
+readme_kind = "package"
+package_name = "@idfkit/types-v9-4"
+sentence = "Generated TypeScript interfaces and a `TypeMap` for EnergyPlus 9.4.0."
+mechanisms = ["readme"]
+declared_at = { path = "packages/types-v9-4/README.md", locator = "idfkit-brand/(identity-[0-9]{4}\\.[0-9]+)/marks/", form = "image-url" }
+
+[[touchpoint]]
+id = "package-weather"
+kind = "readme"
+repository = "idfkit/idfkit-js"
+readme_kind = "package"
+package_name = "@idfkit/weather"
+sentence = "Browser-side EPW weather-file retrieval for EnergyPlus, from the climate.onebuilding.org TMYx index."
+mechanisms = ["readme"]
+declared_at = { path = "packages/weather/README.md", locator = "idfkit-brand/(identity-[0-9]{4}\\.[0-9]+)/marks/", form = "image-url" }
+
+[[touchpoint]]
+id = "package-engine"
+kind = "readme"
+repository = "idfkit/idfkit-engine"
+readme_kind = "package"
+package_name = "@idfkit/engine"
+sentence = "Run building energy simulations in the browser or Node via WebAssembly."
+mechanisms = ["readme"]
+declared_at = { path = "packages/engine/README.md", locator = "idfkit-brand/(identity-[0-9]{4}\\.[0-9]+)/marks/", form = "image-url" }
+
+[[touchpoint]]
+id = "package-engine-assets"
+kind = "readme"
+repository = "idfkit/idfkit-engine"
+readme_kind = "package"
+package_name = "@idfkit/engine-assets"
+sentence = "The WebAssembly build of the simulation engine, its input dictionary and its reference datasets, for use with @idfkit/engine."
+mechanisms = ["readme"]
+declared_at = { path = "packages/engine-assets/README.md", locator = "idfkit-brand/(identity-[0-9]{4}\\.[0-9]+)/marks/", form = "image-url" }
+
+[[touchpoint]]
+id = "package-language-server"
+kind = "readme"
+repository = "idfkit/idfkit-lsp"
+readme_kind = "package"
+package_name = "@idfkit/language-server"
+sentence = "A language server for EnergyPlus model text, translating the idfkit language service into the Language Server Protocol."
+mechanisms = ["readme"]
+declared_at = { path = "model-server/README.md", locator = "idfkit-brand/(identity-[0-9]{4}\\.[0-9]+)/marks/", form = "image-url" }
+
+[[touchpoint]]
+id = "package-idfkit-lsp"
+kind = "readme"
+repository = "idfkit/idfkit-lsp"
+readme_kind = "package"
+package_name = "idfkit-lsp"
+sentence = "A Language Server Protocol implementation for EnergyPlus models, built on idfkit."
+mechanisms = ["readme"]
+declared_at = { path = "server/README.md", locator = "idfkit-brand/(identity-[0-9]{4}\\.[0-9]+)/marks/", form = "image-url" }

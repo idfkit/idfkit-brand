@@ -122,3 +122,9 @@ python idfkit-brand/tools/check_touchpoint.py --root <touchpoint> --level <tag> 
 ```
 
 and continue at step 6.
+
+A repository may hold several README entries, its root README and one per package it publishes
+(`readme_kind = "package"`, section 7 of that contract). They move together, because the check runs
+over all of them. A package README is the file at the entry's `declared_at.path`. Where a generator
+writes it, as `scripts/emit-types.mjs` does in `idfkit-js`, change the generator and regenerate. A
+private repository has package entries only: its root README stays outside until it is public.

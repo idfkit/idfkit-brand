@@ -20,6 +20,8 @@ from __future__ import annotations
 
 import argparse
 import re
+import shutil
+import subprocess
 import sys
 from collections.abc import Iterable
 from dataclasses import dataclass
@@ -322,6 +324,10 @@ def masters(word: Wordmark | None = None) -> dict[str, str]:
     }
 
 
+#: The tile as a raster, a README header's fallback image, since an SVG is refused there by a marketplace's
+#: packaging tool. It is committed beside the masters, so that a README addresses it in marks/ at the tag.
+TILE_RASTER = "tile.png"
+TILE_RASTER_SIZE = 256
 MASTER_NAMES: tuple[str, ...] = (
     "mark.svg",
     "mark-on-light.svg",
@@ -332,6 +338,12 @@ MASTER_NAMES: tuple[str, ...] = (
     "lockup-on-light.svg",
     "lockup-on-dark.svg",
 )
+
+
+def rasterize_tile(svg: Path, png: Path) -> None:
+    """Draw the tile master at the raster size. The validator compares the committed file by decoded pixels."""
+    args = ["rsvg-convert", "--width", str(TILE_RASTER_SIZE), "--height", str(TILE_RASTER_SIZE)]
+    subprocess.run([*args, "--output", str(png), str(svg)], check=True)
 
 
 def write(directory: Path = MARKS) -> list[Path]:
@@ -372,7 +384,13 @@ def main(argv: Iterable[str] | None = None) -> int:
             return 1
         print(f"marks/: {len(MASTER_NAMES)} masters match mark.py")
         return 0
-    for path in write(Path(args.write)):
+    if shutil.which("rsvg-convert") is None:
+        print("rsvg-convert is not on PATH; install librsvg to write marks/tile.png. Nothing was written.")
+        return 2
+    directory = Path(args.write)
+    written = write(directory)
+    rasterize_tile(directory / "tile.svg", directory / TILE_RASTER)
+    for path in (*written, directory / TILE_RASTER):
         print("wrote", path.relative_to(HERE) if path.is_relative_to(HERE) else path)
     return 0
 

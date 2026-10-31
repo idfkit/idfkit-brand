@@ -134,8 +134,14 @@ def test_readme_and_repo_preview_derivations(dist: Path, root: Path) -> None:
     assert 'width="96" height="96"' in (dist / "readme" / "mark-on-dark.svg").read_text(encoding="utf-8")
     roster = load_roster(root / "touchpoints.toml")
     previews = sorted(p.name for p in (dist / "repo-preview").glob("*.png"))
-    assert previews == sorted(f"{build_module.preview_name(t)}.png" for t in roster.readmes())
+    # A package's README shares its repository's social preview, so the package entries add none.
+    assert previews == sorted(f"{build_module.preview_name(t)}.png" for t in roster.root_readmes())
+    assert len(previews) == 12
     from rasters import png_size
+
+    tile = dist / "readme" / "tile.png"
+    assert tile.read_bytes() == (root / "marks" / "tile.png").read_bytes()
+    assert png_size(tile.read_bytes()) == (256, 256)
 
     for path in (dist / "repo-preview").glob("*.png"):
         assert png_size(path.read_bytes()) == (1280, 640)
@@ -195,6 +201,7 @@ def test_brand_page_names_the_tag_and_every_exception(dist: Path, root: Path) ->
         for exception in touchpoint.exceptions:
             assert exception.part in page
     assert "releases/download/identity-2026.1/mark-on-dark.svg" in page
+    assert "releases/download/identity-2026.1/tile.png" in page
     assert (dist / "brand-page" / "assets" / "incorrect-rotated.svg").exists()
 
 

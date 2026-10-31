@@ -7,6 +7,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- `marks/tile.png`, the tile as a 256 px raster, committed beside its master, compared by decoded
+  pixels in the validator, and attached to the release as the sixth loose image.
+- The package README: thirteen roster entries of `readme_kind = "package"`, one for each published
+  package whose page is not its repository's root README, including those built in a private
+  repository. Each carries the mark, the package's name as installed, one sentence and the family
+  links, with no badge row. A package entry adds no social preview.
+
+### Changed
+
+- **Breaking for a README:** every header's fallback image is `tile.png`, since the VS Code
+  Marketplace's packaging tool refuses an SVG in an `<img>`. A README moving to this tag changes the
+  file name in its fallback address as well as the tag.
+- The check fails a README that a package index or marketplace shows when it links a retired host
+  anywhere in the file. Prose naming such a host as retired is permitted.
+- The roster refuses a root README entry for a private repository.
+
 ## [identity-2026.1] - 2026-10-31
 
 The first release of the standard. The owner reviewed every graphic on the contact sheet on both

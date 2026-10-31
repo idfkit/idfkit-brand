@@ -59,7 +59,7 @@ ignore = ["E501", "E731"]
 # S105 fires on the string "fontWeight" assigned to a variable named token_type: a design token, not a secret.
 "tools/*" = ["T201", "TRY003", "S603", "S607", "S105"]
 "build.py" = ["T201", "TRY003", "S603", "S607"]
-"mark.py" = ["T201", "TRY003"]
+"mark.py" = ["T201", "TRY003", "S603", "S607"]
 
 [tool.ruff.lint.mccabe]
 max-complexity = 18

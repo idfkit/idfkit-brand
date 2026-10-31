@@ -67,6 +67,7 @@ README_IMAGES: tuple[str, ...] = (
     "mark-on-dark.svg",
     "mark-on-light.svg",
     "tile.svg",
+    "tile.png",
     "lockup-on-dark.svg",
     "lockup-on-light.svg",
 )
@@ -695,6 +696,7 @@ def build_readme(build: Build) -> None:
     write(out / "mark-on-dark.svg", _with_size((marks / "mark-on-dark.svg").read_text(encoding="utf-8"), 96, 96))
     write(out / "mark-on-light.svg", _with_size((marks / "mark-on-light.svg").read_text(encoding="utf-8"), 96, 96))
     write(out / "tile.svg", _with_size((marks / "tile.svg").read_text(encoding="utf-8"), 96, 96))
+    copy(marks / mark.TILE_RASTER, out / mark.TILE_RASTER)
     write(out / "lockup-on-dark.svg", _with_size((marks / "lockup-on-dark.svg").read_text(encoding="utf-8"), 240))
     write(out / "lockup-on-light.svg", _with_size((marks / "lockup-on-light.svg").read_text(encoding="utf-8"), 240))
 
@@ -805,7 +807,7 @@ def preview_name(touchpoint: Touchpoint) -> str:
 
 def build_repo_previews(build: Build) -> None:
     out = build.out / "repo-preview"
-    for touchpoint in build.roster.readmes():
+    for touchpoint in build.roster.root_readmes():
         png = out / f"{preview_name(touchpoint)}.png"
         rasterize_text(repo_preview_svg(build, touchpoint), png, 1280, 640)
         if png.stat().st_size >= 1_000_000:
@@ -978,7 +980,7 @@ def build_brand_page(build: Build, pairs: Iterable[PairResult]) -> None:
     out = build.out / "brand-page"
     assets = out / "assets"
     marks = build.root / "marks"
-    for name in mark.MASTER_NAMES:
+    for name in (*mark.MASTER_NAMES, mark.TILE_RASTER):
         copy(marks / name, assets / name)
     for name, text in incorrect_uses(build).items():
         write(assets / name, text)
@@ -1026,6 +1028,13 @@ def build_brand_page(build: Build, pairs: Iterable[PairResult]) -> None:
         ),
         _specimen(
             prefix + "tile.svg", "tile.svg", "the tile: favicons and app icons", "split", download=download("tile.svg")
+        ),
+        _specimen(
+            prefix + mark.TILE_RASTER,
+            mark.TILE_RASTER,
+            "the tile as a 256 px raster: the fallback image of a README header",
+            "split",
+            download=download(mark.TILE_RASTER),
         ),
         _specimen(
             prefix + "mark-small.svg",

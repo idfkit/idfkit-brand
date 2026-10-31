@@ -27,11 +27,14 @@ TOKEN_TYPES: tuple[str, ...] = ("color", "dimension", "fontFamily", "fontWeight"
 #: Mechanisms `contracts/derivations.md` defines; a roster entry may name no other.
 MECHANISMS: tuple[str, ...] = ("css", "material", "envelop", "stytch", "hero", "readme")
 DECLARATION_FORMS: tuple[str, ...] = ("toml-key", "json-pointer", "image-url")
-README_KINDS: tuple[str, ...] = ("library", "service", "site", "plugin", "profile")
+README_KINDS: tuple[str, ...] = ("library", "service", "site", "plugin", "profile", "package")
 TOUCHPOINT_KINDS: tuple[str, ...] = ("host", "readme")
 LAG_KINDS: tuple[str, ...] = ("not-yet", "deliberate")
 #: Hosts no touchpoint may link (FR-021).
 RETIRED_HOSTS: tuple[str, ...] = ("py.idfkit.com", "js.idfkit.com")
+#: Repositories whose root README is not a touchpoint until they are public; their hosts and the
+#: READMEs of the packages they publish are (FR-033b).
+PRIVATE_REPOSITORIES: tuple[str, ...] = ("idfkit/idfkit-app", "idfkit/idfkit-engine", "idfkit/idfkit-mcp-deployment")
 #: Words that make an exception's reason a lag in disguise (contract section 6).
 LAG_WORDS: tuple[str, ...] = ("yet", "later", "todo")
 
@@ -241,6 +244,8 @@ class Touchpoint:
     lockup_at: tuple[str, ...] = ()
     readme_kind: str | None = None
     sentence: str | None = None
+    package_name: str | None = None
+    indexed: bool = False
     notes: str | None = None
     exceptions: tuple[TouchpointException, ...] = ()
 
@@ -270,6 +275,10 @@ class Roster:
 
     def readmes(self) -> list[Touchpoint]:
         return [t for t in self.touchpoints if t.kind == "readme"]
+
+    def root_readmes(self) -> list[Touchpoint]:
+        """One per repository that has a root README entry, which is what a social preview belongs to."""
+        return [t for t in self.readmes() if t.readme_kind != "package"]
 
 
 @dataclass(frozen=True, slots=True)
@@ -475,6 +484,9 @@ def _touchpoint(raw: Mapping[str, Any], index: int) -> Touchpoint:
     property_name = raw.get("property_name")
     readme_kind = raw.get("readme_kind")
     sentence = raw.get("sentence")
+    package_name = raw.get("package_name")
+    declaration = _declaration(raw.get("declared_at"), f"{where}.declared_at")
+    repository = _require(raw, "repository", where, str)
     if kind == "host":
         if not isinstance(host, str) or not host:
             raise ShapeError(f"{where}.host", "a host touchpoint names its host")
@@ -493,13 +505,24 @@ def _touchpoint(raw: Mapping[str, Any], index: int) -> Touchpoint:
             raise ShapeError(f"{where}.sentence", "a readme touchpoint carries the one sentence its header shows")
         if not sentence.rstrip().endswith("."):
             raise ShapeError(f"{where}.sentence", "the sentence ends in a full stop")
+        if readme_kind == "package":
+            if not isinstance(package_name, str) or not package_name:
+                raise ShapeError(f"{where}.package_name", "a package entry names the package as it is installed")
+            if declaration.path == "README.md":
+                raise ShapeError(
+                    f"{where}.declared_at", "a package entry names a package's README, not the repository's root README"
+                )
+        elif repository in PRIVATE_REPOSITORIES:
+            raise ShapeError(
+                f"{where}.repository", f"{repository} is private, so its root README is not a touchpoint (FR-033b)"
+            )
     exceptions = tuple(_exception(e, f"{where}.exception[{i}]") for i, e in enumerate(raw.get("exception", [])))
     return Touchpoint(
         id=touchpoint_id,
         kind=kind,
-        repository=_require(raw, "repository", where, str),
+        repository=repository,
         mechanisms=mechanisms,
-        declared_at=_declaration(raw.get("declared_at"), f"{where}.declared_at"),
+        declared_at=declaration,
         host=host if isinstance(host, str) else None,
         property_name=property_name if isinstance(property_name, str) else None,
         vendored=tuple(raw.get("vendored", ())),
@@ -507,6 +530,9 @@ def _touchpoint(raw: Mapping[str, Any], index: int) -> Touchpoint:
         lockup_at=tuple(raw.get("lockup_at", ())),
         readme_kind=readme_kind if isinstance(readme_kind, str) else None,
         sentence=sentence if isinstance(sentence, str) else None,
+        package_name=package_name if isinstance(package_name, str) else None,
+        # Every package's README is shown by its index; a root README is when the roster says so.
+        indexed=readme_kind == "package" or raw.get("indexed") is True,
         notes=raw.get("notes") if isinstance(raw.get("notes"), str) else None,
         exceptions=exceptions,
     )
@@ -564,6 +590,7 @@ __all__ = [
     "LAG_KINDS",
     "LEVEL_PATTERN",
     "MECHANISMS",
+    "PRIVATE_REPOSITORIES",
     "README_KINDS",
     "RETIRED_HOSTS",
     "THEMES",
