@@ -261,8 +261,12 @@ class Font:
 
     # 3. Text
 
-    def run(self, text: str, tracking_em: float = 0.0) -> TextRun:
-        """`text` on one line as a path in font units, with optional tracking in em."""
+    def run(self, text: str, tracking_em: float = 0.0, space_em: float | None = None) -> TextRun:
+        """`text` on one line as a path in font units, with optional tracking in em.
+
+        `space_em` replaces the face's own word space: a monospaced face gives the space a full
+        character cell, which reads as a gap in a two-word label such as "EnergyPlus docs".
+        """
         parts: list[str] = []
         x = 0.0
         tracking = tracking_em * self.units_per_em
@@ -270,13 +274,18 @@ class Font:
             glyph = self.glyph_id(char)
             for contour in self.contours(glyph):
                 parts.append(contour_path(contour, x))
-            x += self.advance(glyph) + tracking
+            x += self._advance_of(char, glyph, space_em) + tracking
         return TextRun(
             path="".join(parts), advance=x - tracking, units_per_em=self.units_per_em, descender=self.descender
         )
 
-    def measure(self, text: str) -> float:
-        return sum(self.advance(self.glyph_id(c)) for c in text)
+    def _advance_of(self, char: str, glyph: int, space_em: float | None) -> float:
+        if char == " " and space_em is not None:
+            return space_em * self.units_per_em
+        return self.advance(glyph)
+
+    def measure(self, text: str, space_em: float | None = None) -> float:
+        return sum(self._advance_of(c, self.glyph_id(c), space_em) for c in text)
 
 
 def _f2dot14(data: bytes, offset: int) -> float:

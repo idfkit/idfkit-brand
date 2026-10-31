@@ -81,6 +81,9 @@ X_HEIGHT_FRACTION = 0.70
 LABEL_X_HEIGHT_FRACTION = 0.55
 #: The label face's descent below the baseline, as a fraction of its em, when no outline is given.
 LABEL_DESCENT_FRACTION = 0.3
+#: The word space inside a property name, in em. The label face is monospaced and gives a space a
+#: whole cell (0.6 em), which reads as a gap in "EnergyPlus docs" and "Sign in"; the build sets it to this.
+LABEL_SPACE_EM = 0.3
 
 #: Clear space on every side is the piece's width, 0.3 of the ink height; minimum size 16 px;
 #: below 24 px the tile stands in for the bare mark.

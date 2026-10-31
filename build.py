@@ -735,7 +735,7 @@ def lockup_for(build: Build, touchpoint: Touchpoint | None, name: str | None) ->
     if not name:
         parts, g = mark.lockup_parts(ink, build.word)
         return parts, g.width, g.height
-    label: TextRun = build.label_font.run(name)
+    label: TextRun = build.label_font.run(name, space_em=mark.LABEL_SPACE_EM)
     lockup = mark.property_lockup_parts(ink, name, build.word, label, divider=divider)
     return lockup.markup, lockup.width, lockup.height
 
@@ -901,7 +901,7 @@ def build_brand_page(build: Build, pairs: Iterable[PairResult]) -> None:
     ink = build.tokens.resolve("color.role.ink", "dark")
     for touchpoint in build.roster.hosts():
         if touchpoint.property_name:
-            label = build.label_font.run(touchpoint.property_name)
+            label = build.label_font.run(touchpoint.property_name, space_em=mark.LABEL_SPACE_EM)
             write(
                 assets / f"lockup-{touchpoint.id}.svg",
                 mark.svg_property_lockup(

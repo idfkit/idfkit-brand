@@ -72,3 +72,14 @@ def test_the_property_lockup_leaves_room_for_descenders(root: Path) -> None:
     assert lockup.height > plain.baseline, "the p of Envelop reaches below the baseline"
     svg = mark.svg_property_lockup(mark.INK_ON_DARK, "Envelop", mark.read_wordmark(), label)
     assert f'viewBox="0 0 {lockup.width:.2f} {lockup.height:.2f}"' in svg
+
+
+def test_the_word_space_in_a_property_name_is_narrowed(root: Path) -> None:
+    from glyphs import Font
+
+    font = Font.load(root / "fonts" / "build" / "jetbrains-mono-500.ttf")
+    full = font.run("EnergyPlus docs")
+    narrowed = font.run("EnergyPlus docs", space_em=mark.LABEL_SPACE_EM)
+    cell = font.advance(font.glyph_id(" "))
+    assert narrowed.advance == full.advance - (cell - mark.LABEL_SPACE_EM * font.units_per_em)
+    assert mark.LABEL_SPACE_EM < 0.6
