@@ -110,7 +110,7 @@ changelog entry where the repository keeps one. Nothing is pushed to a default b
 
 A README vendors nothing: its declaration is the tag inside the three image addresses of its header
 (contracts/readme-header.md section 1). Steps 2 to 4 are one edit: rewrite the tag in every
-`https://github.com/idfkit/idfkit-brand/releases/download/<old-tag>/` address of the header to the
+`https://raw.githubusercontent.com/idfkit/idfkit-brand/<old-tag>/marks/` address of the header to the
 new tag, leaving the file names as they are. Then run assertion 5 against the rewritten file:
 
 ```bash

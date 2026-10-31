@@ -45,7 +45,9 @@ STANDARD_ROOT = Path(__file__).resolve().parent.parent
 EXIT_FINDINGS = 1
 EXIT_UNREADABLE = 2
 
-RELEASE_HOST = "https://github.com/idfkit/idfkit-brand/releases/download/"
+# The masters at the tag. A release asset cannot be this address: GitHub serves one as an attachment of type
+# application/octet-stream, under which a browser will not display an SVG (research R15).
+IMAGE_HOST = "https://raw.githubusercontent.com/idfkit/idfkit-brand/"
 LOCKUP_STYLESHEET = "lockup.css"
 # The opening of the mark's larger path: present wherever the mark has been pasted into a page.
 MARK_PATH = "M4 15a3 3 0 0 1 3-3h17"
@@ -460,9 +462,11 @@ def _check_picture_block(
             )
         )
     for address, expected in zip(addresses, expected_files, strict=False):
-        if address != f"{RELEASE_HOST}{level}/{expected}":
+        if address != f"{IMAGE_HOST}{level}/marks/{expected}":
             findings.append(
-                Finding(5, f"expected {RELEASE_HOST}{level}/{expected}, found {address}", file, str(picture_start + 1))
+                Finding(
+                    5, f"expected {IMAGE_HOST}{level}/marks/{expected}, found {address}", file, str(picture_start + 1)
+                )
             )
     width = re.search(r'width="(\d+)"', block)
     expected_width = "240" if profile else "72"

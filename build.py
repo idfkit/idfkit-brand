@@ -1142,7 +1142,7 @@ CONSUMERS: dict[str, str] = {
     "envelop": "app.idfkit.com",
     "stytch": "auth.idfkit.com",
     "hero": "idfkit.com",
-    "readme": "every root README, by URL at the tag",
+    "readme": "the brand page's downloads; a README addresses marks/ at the tag",
     "repo-preview": "the owner, by hand, in each repository's Social preview setting",
     "hosts": "each host, its own directory",
     "brand-page": "idfkit.com at /brand/",
