@@ -345,9 +345,22 @@ def scan_line(line: str, suffix: str) -> str | None:
     return None
 
 
-def check_literals(root: Path, entry: Touchpoint) -> list[Finding]:
+def _head_lines(entry: Touchpoint, dist: Path | None) -> frozenset[str]:
+    """The lines of the host's head.html at the tag, stripped: the standard's own lines, pasted where a host
+    cannot include a file (a Material override, a static page). A theme-color meta carries a hex value, and a
+    line that is verbatim one of these is not a stray literal."""
+    if dist is None or not entry.host_name:
+        return frozenset()
+    head = dist / "hosts" / entry.host_name / "head.html"
+    if not head.is_file():
+        return frozenset()
+    return frozenset(line.strip() for line in head.read_text(encoding="utf-8").splitlines() if line.strip())
+
+
+def check_literals(root: Path, entry: Touchpoint, dist: Path | None = None) -> list[Finding]:
     findings: list[Finding] = []
     allowed = {e.part for e in entry.exceptions}
+    head_lines = _head_lines(entry, dist)
     seen: set[Path] = set()
     for pattern in entry.identity_bearing:
         for path in sorted(root.glob(pattern)):
@@ -367,7 +380,7 @@ def check_literals(root: Path, entry: Touchpoint) -> list[Finding]:
                 continue
             for number, line in enumerate(lines, start=1):
                 literal = scan_line(line, path.suffix)
-                if literal is None:
+                if literal is None or line.strip() in head_lines:
                     continue
                 marker = EXCEPTION_MARKER.search(line)
                 if marker and marker.group(1) in allowed:
@@ -604,7 +617,7 @@ def check(
                 )
             else:
                 findings += check_vendored(root, entry, dist, rasters)
-            findings += check_literals(root, entry)
+            findings += check_literals(root, entry, dist)
         else:
             findings += check_readme(root, entry, roster, level)
     return findings

@@ -137,6 +137,25 @@ def test_a_stray_literal_fails_naming_file_line_and_value(
     assert "#ff0000" in findings[0].message
 
 
+def test_a_pasted_head_fragment_is_not_a_stray_literal(tmp_path: Path, dist: Path, roster: Roster, root: Path) -> None:
+    touchpoint = _css_touchpoint(tmp_path, dist)
+    head = (dist / "hosts" / "shoebox.idfkit.com" / "head.html").read_text(encoding="utf-8")
+    assert "theme-color" in head and "#" in head
+    page = touchpoint / "index.html"
+    page.write_text(page.read_text(encoding="utf-8").replace("<head>", "<head>\n" + head, 1), encoding="utf-8")
+    findings = ct.check(
+        roster, "idfkit/idfkit-shoebox", touchpoint, LEVEL, dist, root, "compare", "host", require_tag=False
+    )
+    assert findings == []
+    (touchpoint / "index.html").write_text(
+        page.read_text(encoding="utf-8").replace('content="#060a14"', 'content="#060a15"', 1), encoding="utf-8"
+    )
+    findings = ct.check(
+        roster, "idfkit/idfkit-shoebox", touchpoint, LEVEL, dist, root, "compare", "host", require_tag=False
+    )
+    assert [f.assertion for f in findings] == [4] and "#060a15" in findings[0].message
+
+
 def test_a_marked_literal_with_a_matching_exception_passes(tmp_path: Path, dist: Path, root: Path) -> None:
     touchpoint = _css_touchpoint(tmp_path, dist)
     (touchpoint / "src" / "sheet.css").write_text(

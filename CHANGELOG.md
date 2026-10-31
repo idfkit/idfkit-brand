@@ -24,3 +24,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   five assertions a touchpoint's CI runs at its pinned tag; `tools/sweep_touchpoints.py`, run by the
   maintainer through the `identity-sweep` skill.
 - The `identity-adopt` skill, the procedure that brings one touchpoint to a tag.
+- Assertion 4 of `tools/check_touchpoint.py` treats a line that is verbatim a line of the host's
+  `head.html` as the standard's own, so a host that cannot include the fragment may paste it, theme-color
+  metas included, without a finding.
