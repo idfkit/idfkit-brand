@@ -1,0 +1,116 @@
+# The per-touchpoint check (contracts/touchpoint-check.md section 3, research R4).
+#
+# Every touchpoint calls this, with the identity tag on its `uses:` line:
+#
+#     jobs:
+#       identity:
+#         uses: idfkit/idfkit-brand/.github/workflows/check-touchpoint.yml@identity-2026.1
+#         with:
+#           identity_level: identity-2026.1
+#
+# ONE IMPLEMENTATION, EVERY CALLER. The pin is the `@ref` on the caller's `uses:` line, which GitHub
+# resolves rather than our code, so "a pinned immutable tag, never a branch" (FR-004, FR-008) is
+# enforced by the platform and visible in the caller's own workflow file, where a reviewer will see
+# it move. The tag is stated twice on the caller's side because a called workflow cannot see its
+# own ref; the first step refuses the run unless the two are the same string.
+#
+# WHAT IT ASSERTS: the five assertions of tools/check_touchpoint.py, read from the SAME tag as the
+# roster, against the caller's tree and the tag's release archives. It never compares against the
+# latest tag: a touchpoint is allowed to be behind, and the maintainer's sweep says who is. It never
+# reads the network beyond fetching the tag and its release.
+#
+# FAILURE MODES ARE DISTINGUISHABLE. A touchpoint that departs from its declared tag fails the
+# `check` step, naming the file and the place. A tag that cannot be read exits 2 at `Read the
+# standard at the tag` and never falls back to a branch or a copy on disk.
+
+name: check-touchpoint
+
+on:
+  workflow_call:
+    inputs:
+      identity_level:
+        description: The identity-YYYY.N tag of idfkit-brand, identical to the @ref on the caller's uses line.
+        required: true
+        type: string
+      rasters:
+        description: Compare vendored rasters by decoded pixels (compare), or skip them (skip).
+        required: false
+        type: string
+        default: compare
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: identity
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      LEVEL: ${{ inputs.identity_level }}
+      CALLER: ${{ github.workflow_ref }}
+    steps:
+      - name: Refuse anything but an identity tag
+        run: |
+          if [[ ! "$LEVEL" =~ ^identity-[0-9]{4}\.[0-9]+$ ]]; then
+            echo "::error title=Not an identity tag::'$LEVEL' is not identity-YYYY.N. The standard is read at an immutable tag, never a branch (FR-004)."
+            exit 2
+          fi
+
+      - name: Check out this touchpoint
+        uses: actions/checkout@v4
+        with:
+          path: touchpoint
+          persist-credentials: false
+
+      - name: The tag on uses and the tag passed in are one fact
+        run: |
+          # github.workflow_ref names the CALLER's workflow: owner/repo/<path>@<ref>.
+          path="${CALLER#*/*/}"
+          path="${path%@*}"
+          if ! grep -Eq "idfkit-brand/\.github/workflows/check-touchpoint\.yml@${LEVEL//./\\.}([[:space:]]|$)" "touchpoint/$path"; then
+            echo "::error file=$path,title=Two pins::$path passes identity_level=$LEVEL but does not call check-touchpoint.yml@$LEVEL. State the tag once on uses: and once as the input, identically."
+            exit 2
+          fi
+
+      - name: Read the standard at the tag
+        id: standard
+        uses: actions/checkout@v4
+        with:
+          repository: idfkit/idfkit-brand
+          ref: refs/tags/${{ inputs.identity_level }}
+          path: standard
+          persist-credentials: false
+
+      - name: Say so when the standard could not be read
+        if: failure() && steps.standard.outcome == 'failure'
+        run: |
+          echo "::error title=Standard unreadable::idfkit-brand could not be read at $LEVEL. This is not a mismatch and not a pass: nothing was checked. The tag must exist in idfkit/idfkit-brand; nothing falls back to a branch."
+          exit 2
+
+      - name: Download the tag's release archives
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p dist
+          gh release download "$LEVEL" --repo idfkit/idfkit-brand --dir dist --pattern '*.tar.gz'
+          for archive in dist/*.tar.gz; do
+            name="$(basename "$archive" .tar.gz)"
+            mkdir -p "dist/$name"
+            tar -xzf "$archive" -C "dist/$name"
+            rm "$archive"
+          done
+          ls dist
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check
+        run: >-
+          python standard/tools/check_touchpoint.py
+          --repository "$GITHUB_REPOSITORY"
+          --level "$LEVEL"
+          --root touchpoint
+          --dist dist
+          --rasters "${{ inputs.rasters }}"

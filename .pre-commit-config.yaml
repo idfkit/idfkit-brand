@@ -1,0 +1,24 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: "v6.0.0"
+    hooks:
+      - id: check-case-conflict
+      - id: check-merge-conflict
+      - id: check-toml
+      - id: check-yaml
+        args: [--unsafe]
+      - id: check-json
+      # marks/ holds generated SVG masters compared byte for byte against mark.py's output, fonts/
+      # holds binaries and design/ holds PDFs; none may be touched by a formatter.
+      - id: end-of-file-fixer
+        exclude: ^(marks/|fonts/|design/)
+      - id: trailing-whitespace
+        exclude: ^(marks/|fonts/|design/)
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: "v0.16.6"
+    hooks:
+      - id: ruff-check
+        args: [ --exit-non-zero-on-fix ]
+      - id: ruff-format
+        types_or: [python, pyi]

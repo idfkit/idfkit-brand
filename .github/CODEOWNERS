@@ -1,0 +1,8 @@
+# The standard's source. A change to any of these moves what every touchpoint renders at the next
+# tag, so the owner reviews it (plan, Constitution Check: the brand repository's review rule is its
+# CODEOWNERS; cross-language review is not required for a colour).
+/identity.tokens.json  @samuelduchesne
+/mark.py               @samuelduchesne
+/marks/                @samuelduchesne
+/touchpoints.toml      @samuelduchesne
+/templates/            @samuelduchesne

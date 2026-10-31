@@ -1,0 +1,121 @@
+{
+  "$description": "The idfkit visual identity, in the Design Tokens Community Group JSON module, restricted as the identity standard's contract states: six groups, colour primitives with both themes, colour roles that alias primitives, a usage on every token. Every identity value is written here and nowhere else (FR-002). The file names no touchpoint, no mechanism and no file path.",
+  "color": {
+    "$description": "Primitives are the palette; roles are what a touchpoint reads. A role never holds a literal.",
+    "primitive": {
+      "navy-950": { "$type": "color", "$value": { "light": "#060a14", "dark": "#060a14" }, "$description": "The darkest navy: the dark theme's page ground and the tile's field." },
+      "navy-900": { "$type": "color", "$value": { "light": "#0c1222", "dark": "#0c1222" }, "$description": "Navy one step up: the dark theme's surface." },
+      "navy-850": { "$type": "color", "$value": { "light": "#0f1629", "dark": "#0f1629" }, "$description": "Navy two steps up: the dark theme's raised surface, a card." },
+      "navy-800": { "$type": "color", "$value": { "light": "#141d35", "dark": "#141d35" }, "$description": "Navy three steps up: the dark theme's border and a card's hover ground." },
+      "slate-50": { "$type": "color", "$value": { "light": "#f8fafc", "dark": "#f8fafc" }, "$description": "The lightest slate: the light theme's surface." },
+      "slate-100": { "$type": "color", "$value": { "light": "#f1f5f9", "dark": "#f1f5f9" }, "$description": "Slate one step down: the light theme's raised surface, a card." },
+      "slate-200": { "$type": "color", "$value": { "light": "#e2e8f0", "dark": "#e2e8f0" }, "$description": "Soft off-white: the dark theme's body ink and the light theme's border." },
+      "slate-400": { "$type": "color", "$value": { "light": "#94a3b8", "dark": "#94a3b8" }, "$description": "Mid slate: the dark theme's muted ink." },
+      "slate-500": { "$type": "color", "$value": { "light": "#64748b", "dark": "#64748b" }, "$description": "The second muted grey. It fails 4.5:1 on both grounds and is held to 3:1 through the ink-label role (research R8)." },
+      "slate-600": { "$type": "color", "$value": { "light": "#475569", "dark": "#475569" }, "$description": "Dark slate: the light theme's muted ink." },
+      "slate-950": { "$type": "color", "$value": { "light": "#0b1020", "dark": "#0b1020" }, "$description": "Near-black navy: the light theme's body ink and the mark's ink on light grounds." },
+      "white": { "$type": "color", "$value": { "light": "#ffffff", "dark": "#ffffff" }, "$description": "White: the light theme's page ground and the primary action's text in the light theme." },
+      "blue-300": { "$type": "color", "$value": { "light": "#93c5fd", "dark": "#93c5fd" }, "$description": "Light blue: the end of the cool gradient and the hero scene's ice tone." },
+      "blue-400": { "$type": "color", "$value": { "light": "#60a5fa", "dark": "#60a5fa" }, "$description": "Blue one step lighter than the accent: a hover tint on the dark ground." },
+      "blue-500": { "$type": "color", "$value": { "light": "#3b82f6", "dark": "#3b82f6" }, "$description": "The brand blue: the dark theme's accent and the gradient's start in both themes. 3.68:1 on white, so never the light theme's accent." },
+      "blue-600": { "$type": "color", "$value": { "light": "#2563eb", "dark": "#2563eb" }, "$description": "Blue one step darker: the light theme's accent, 5.17:1 on white (research R8)." },
+      "blue-700": { "$type": "color", "$value": { "light": "#1d4ed8", "dark": "#1d4ed8" }, "$description": "Blue two steps darker: the light theme's pressed accent." },
+      "violet-500": { "$type": "color", "$value": { "light": "#8b5cf6", "dark": "#8b5cf6" }, "$description": "Violet: the gradient's middle stop. 4.23:1 under white text, so a surface for nothing that must be read." },
+      "red-500": { "$type": "color", "$value": { "light": "#ef4444", "dark": "#ef4444" }, "$description": "Red: the gradient's end stop, the hero scene's warm tone, and the dark theme's error ink." },
+      "red-600": { "$type": "color", "$value": { "light": "#dc2626", "dark": "#dc2626" }, "$description": "Red one step darker: the light theme's error ink, 4.83:1 on white." },
+      "amber-500": { "$type": "color", "$value": { "light": "#f59e0b", "dark": "#f59e0b" }, "$description": "Amber: the dark theme's warning ink." },
+      "amber-700": { "$type": "color", "$value": { "light": "#b45309", "dark": "#b45309" }, "$description": "Amber two steps darker: the light theme's warning ink, legible on white." },
+      "green-500": { "$type": "color", "$value": { "light": "#22c55e", "dark": "#22c55e" }, "$description": "Green: the dark theme's success ink." },
+      "green-700": { "$type": "color", "$value": { "light": "#15803d", "dark": "#15803d" }, "$description": "Green two steps darker: the light theme's success ink, legible on white." }
+    },
+    "role": {
+      "ground": { "$type": "color", "$value": { "light": "{color.primitive.white}", "dark": "{color.primitive.navy-950}" }, "$description": "The page background." },
+      "surface": { "$type": "color", "$value": { "light": "{color.primitive.slate-50}", "dark": "{color.primitive.navy-900}" }, "$description": "A section or panel one step off the ground." },
+      "surface-raised": { "$type": "color", "$value": { "light": "{color.primitive.slate-100}", "dark": "{color.primitive.navy-850}" }, "$description": "A card or code block two steps off the ground." },
+      "border": { "$type": "color", "$value": { "light": "{color.primitive.slate-200}", "dark": "{color.primitive.navy-800}" }, "$description": "A one-pixel rule between surfaces. Not an ink: it is not held to a text ratio." },
+      "ink": { "$type": "color", "$value": { "light": "{color.primitive.slate-950}", "dark": "{color.primitive.slate-200}" }, "$description": "Body text and headings, on every ground and surface.", "$extensions": { "idfkit": { "minContrast": 4.5, "on": ["ground", "surface", "surface-raised"] } } },
+      "ink-muted": { "$type": "color", "$value": { "light": "{color.primitive.slate-600}", "dark": "{color.primitive.slate-400}" }, "$description": "Secondary copy: descriptions, captions, metadata set at body size.", "$extensions": { "idfkit": { "minContrast": 4.5, "on": ["ground", "surface", "surface-raised"] } } },
+      "ink-label": { "$type": "color", "$value": { "light": "{color.primitive.slate-500}", "dark": "{color.primitive.slate-500}" }, "$description": "Labels at 24 px or larger, eyebrows, and non-text elements such as the lockup's divider. Never body text: it meets 3:1 and not 4.5:1 (research R8).", "$extensions": { "idfkit": { "minContrast": 3, "on": ["ground", "surface", "surface-raised"] } } },
+      "accent": { "$type": "color", "$value": { "light": "{color.primitive.blue-600}", "dark": "{color.primitive.blue-500}" }, "$description": "The one brand accent: the primary action's ground, the current link, and emphasis. Same hue in both themes, one step apart (FR-013).", "$extensions": { "idfkit": { "minContrast": 4.5, "on": ["ground", "surface", "surface-raised"] } } },
+      "accent-ink": { "$type": "color", "$value": { "light": "{color.primitive.white}", "dark": "{color.primitive.navy-950}" }, "$description": "Text set on the accent: the primary button's label. Dark ink on the dark theme's accent, white on the light theme's.", "$extensions": { "idfkit": { "minContrast": 4.5, "on": ["accent"] } } },
+      "link": { "$type": "color", "$value": { "light": "{color.primitive.blue-600}", "dark": "{color.primitive.blue-500}" }, "$description": "An inline link in running text.", "$extensions": { "idfkit": { "minContrast": 4.5, "on": ["ground", "surface", "surface-raised"] } } },
+      "focus": { "$type": "color", "$value": { "light": "{color.primitive.blue-600}", "dark": "{color.primitive.blue-500}" }, "$description": "The focus ring, a non-text element held to 3:1 against the grounds it is drawn on.", "$extensions": { "idfkit": { "minContrast": 3, "on": ["ground", "surface", "surface-raised"] } } },
+      "gradient-start": { "$type": "color", "$value": { "light": "{color.primitive.blue-500}", "dark": "{color.primitive.blue-500}" }, "$description": "The brand sweep's first stop. The gradient is a surface for nothing that must be read: hairlines, the hero's bloom, a button's glow (research R8)." },
+      "gradient-mid": { "$type": "color", "$value": { "light": "{color.primitive.violet-500}", "dark": "{color.primitive.violet-500}" }, "$description": "The brand sweep's middle stop, at 40 percent." },
+      "gradient-end": { "$type": "color", "$value": { "light": "{color.primitive.red-500}", "dark": "{color.primitive.red-500}" }, "$description": "The brand sweep's last stop." },
+      "status": {
+        "error": { "$type": "color", "$value": { "light": "{color.primitive.red-600}", "dark": "{color.primitive.red-500}" }, "$description": "An error message or state, as text on the ground.", "$extensions": { "idfkit": { "minContrast": 4.5, "on": ["ground", "surface"] } } },
+        "warning": { "$type": "color", "$value": { "light": "{color.primitive.amber-700}", "dark": "{color.primitive.amber-500}" }, "$description": "A warning message or state, as text on the ground.", "$extensions": { "idfkit": { "minContrast": 4.5, "on": ["ground", "surface"] } } },
+        "success": { "$type": "color", "$value": { "light": "{color.primitive.green-700}", "dark": "{color.primitive.green-500}" }, "$description": "A success message or state, as text on the ground.", "$extensions": { "idfkit": { "minContrast": 4.5, "on": ["ground", "surface"] } } }
+      }
+    }
+  },
+  "font": {
+    "$description": "One text face and one code face, self-hosted from the standard's fonts directory, each with the fallback stack every touchpoint declares after it (FR-016, research R9).",
+    "family": {
+      "text": { "$type": "fontFamily", "$value": "Inter", "$description": "The text face: body, headings, navigation, buttons." },
+      "code": { "$type": "fontFamily", "$value": "JetBrains Mono", "$description": "The code face, which is also the label face: code, telemetry, eyebrows, and the property name in the lockup (research R7)." }
+    },
+    "stack": {
+      "text": { "$type": "fontFamily", "$value": ["Inter", "system-ui", "-apple-system", "Segoe UI", "Roboto", "sans-serif"], "$description": "The text face with its fallback stack, in the order a stylesheet declares them." },
+      "code": { "$type": "fontFamily", "$value": ["JetBrains Mono", "ui-monospace", "SF Mono", "Menlo", "Consolas", "monospace"], "$description": "The code face with its fallback stack." }
+    },
+    "weight": {
+      "regular": { "$type": "fontWeight", "$value": 400, "$description": "Body text and code.", "$extensions": { "idfkit": { "families": ["text", "code"] } } },
+      "medium": { "$type": "fontWeight", "$value": 500, "$description": "Labels, the property name in the lockup, emphasised code.", "$extensions": { "idfkit": { "families": ["text", "code"] } } },
+      "semibold": { "$type": "fontWeight", "$value": 600, "$description": "Buttons and navigation.", "$extensions": { "idfkit": { "families": ["text"] } } },
+      "bold": { "$type": "fontWeight", "$value": 700, "$description": "Headings.", "$extensions": { "idfkit": { "families": ["text"] } } },
+      "extrabold": { "$type": "fontWeight", "$value": 800, "$description": "Display headings, and the weight the wordmark was outlined from.", "$extensions": { "idfkit": { "families": ["text"] } } }
+    }
+  },
+  "space": {
+    "$description": "An 8 px scale. A touchpoint may use any step; it may not contradict one.",
+    "half": { "$type": "dimension", "$value": "4px", "$description": "Half a step: the gap inside a compact control." },
+    "1": { "$type": "dimension", "$value": "8px", "$description": "One step: the gap between an icon and its label." },
+    "2": { "$type": "dimension", "$value": "16px", "$description": "Two steps: a control's padding, a list's gap." },
+    "3": { "$type": "dimension", "$value": "24px", "$description": "Three steps: a card's padding, the page gutter." },
+    "4": { "$type": "dimension", "$value": "32px", "$description": "Four steps: the gap between related blocks." },
+    "6": { "$type": "dimension", "$value": "48px", "$description": "Six steps: the gap between sections of a page." },
+    "8": { "$type": "dimension", "$value": "64px", "$description": "Eight steps: the padding of a hero or a footer." },
+    "12": { "$type": "dimension", "$value": "96px", "$description": "Twelve steps: a section's vertical padding on a tablet." },
+    "18": { "$type": "dimension", "$value": "144px", "$description": "Eighteen steps: a section's vertical padding on a desktop." }
+  },
+  "radius": {
+    "$description": "Corner radii. Modest: sharper reads as engineering.",
+    "sm": { "$type": "dimension", "$value": "4px", "$description": "An inline code span, a badge's corner, a focus ring." },
+    "md": { "$type": "dimension", "$value": "10px", "$description": "A button, an input, a tab." },
+    "lg": { "$type": "dimension", "$value": "16px", "$description": "A card, a code block, a dialog." },
+    "pill": { "$type": "dimension", "$value": "999px", "$description": "A pill, a dot, a toggle." }
+  },
+  "elevation": {
+    "$description": "Elevation is told mostly by surface and border; shadows are reserved for what floats.",
+    "raised": {
+      "$type": "shadow",
+      "$value": {
+        "light": { "color": "#0b102014", "offsetX": "0px", "offsetY": "1px", "blur": "2px", "spread": "0px" },
+        "dark": { "color": "#00000033", "offsetX": "0px", "offsetY": "1px", "blur": "2px", "spread": "0px" }
+      },
+      "$description": "A card at rest."
+    },
+    "overlay": {
+      "$type": "shadow",
+      "$value": {
+        "light": { "color": "#0b102029", "offsetX": "0px", "offsetY": "20px", "blur": "60px", "spread": "0px" },
+        "dark": { "color": "#0000004d", "offsetX": "0px", "offsetY": "20px", "blur": "60px", "spread": "0px" }
+      },
+      "$description": "A card on hover, a menu, a dialog."
+    }
+  },
+  "motion": {
+    "$description": "Two easings and three durations. Every duration is set to zero when the visitor asks for reduced motion (FR-017).",
+    "ease": {
+      "out-expo": { "$type": "cubicBezier", "$value": [0.16, 1, 0.3, 1], "$description": "Large movements: a panel opening, a reveal." },
+      "out-quart": { "$type": "cubicBezier", "$value": [0.25, 1, 0.5, 1], "$description": "Micro-interactions: a hover lift, a colour change." }
+    },
+    "duration": {
+      "fast": { "$type": "duration", "$value": "200ms", "$description": "A hover or focus change." },
+      "base": { "$type": "duration", "$value": "350ms", "$description": "A control's transition." },
+      "slow": { "$type": "duration", "$value": "700ms", "$description": "A reveal on scroll." }
+    }
+  }
+}

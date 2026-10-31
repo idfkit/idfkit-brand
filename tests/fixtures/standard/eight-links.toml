@@ -1,0 +1,262 @@
+# The roster of touchpoints (contracts/touchpoint-check.md section 1).
+#
+# This file never states a level. Each touchpoint declares the tag it renders in its own file, at
+# the place `declared_at` names, and the check reads it there (research R3). A touchpoint that is
+# behind writes a Lag beside that declaration, not here.
+#
+# What changes here: a touchpoint added, a mechanism changed, a declaration moved, an exception
+# recorded. A bump touches nothing in this file.
+
+# 1. The ownership line every web touchpoint carries, naming the organisation (FR-020).
+
+ownership = "An idfkit project. MIT License."
+
+# 2. The family links, in the order every web touchpoint renders them (research R10, FR-019). The
+# sign-in host carries the links and is not among them.
+
+[[family_link]]
+order = 1
+label = "idfkit"
+href = "https://idfkit.com"
+
+[[family_link]]
+order = 2
+label = "Developers"
+href = "https://developers.idfkit.com"
+
+[[family_link]]
+order = 3
+label = "EnergyPlus docs"
+href = "https://docs.idfkit.com"
+
+[[family_link]]
+order = 4
+label = "Envelop"
+href = "https://app.idfkit.com"
+
+[[family_link]]
+order = 5
+label = "MCP"
+href = "https://mcp.idfkit.com"
+
+[[family_link]]
+order = 6
+label = "Shoebox"
+href = "https://shoebox.idfkit.com"
+
+[[family_link]]
+order = 7
+label = "GitHub"
+href = "https://github.com/idfkit"
+
+[[family_link]]
+order = 8
+label = "Status"
+href = "https://status.idfkit.com"
+
+# 3. Hosts. `vendored` paths are compared byte for byte against the tag's dist (assertion 3);
+# `identity_bearing` globs are scanned for stray literals (assertion 4). `notes` is what the
+# identity-adopt skill reads before copying.
+
+[[touchpoint]]
+id = "idfkit-com"
+kind = "host"
+repository = "idfkit/idfkit.com"
+host = "https://idfkit.com"
+property_name = ""
+mechanisms = ["css", "hero"]
+declared_at = { path = "brand/identity.json", locator = "/level", form = "json-pointer" }
+vendored = ["brand/css/", "brand/hero/", "brand/hosts/", "brand/brand-page/"]
+identity_bearing = ["css/**/*.css", "js/**/*.js", "index.html", "docs/**/*.html"]
+notes = "The site serves brand/hosts/idfkit.com/ at /brand/hosts/idfkit.com/, so head.html's paths are rewritten to that prefix at adoption. brand/brand-page/index.html is also copied to brand/index.html so that /brand/ resolves; adoption keeps the two identical."
+
+[[touchpoint]]
+id = "developers"
+kind = "host"
+repository = "idfkit/idfkit-developers"
+host = "https://developers.idfkit.com"
+property_name = "Developers"
+mechanisms = ["material"]
+declared_at = { path = "pyproject.toml", locator = "tool.idfkit.identity.level", form = "toml-key" }
+vendored = ["docs/identity/"]
+identity_bearing = ["docs/stylesheets/**/*.css", "docs/overrides/**/*.html", "mkdocs.yml"]
+notes = "The material derivation and hosts/developers.idfkit.com/ are placed under docs/identity/ so that the site stays buildable from docs/ and mkdocs.yml alone (constitution, Documentation Architecture). The footer partial keeps the pinned-levels line beneath the ownership line."
+
+[[touchpoint]]
+id = "mcp"
+kind = "host"
+repository = "idfkit/idfkit-mcp"
+host = "https://mcp.idfkit.com"
+property_name = "MCP"
+mechanisms = ["material"]
+declared_at = { path = "pyproject.toml", locator = "tool.idfkit.identity.level", form = "toml-key" }
+vendored = ["docs/identity/"]
+identity_bearing = ["docs/stylesheets/**/*.css", "docs/overrides/**/*.html", "mkdocs.yml"]
+notes = "Same placement as developers: docs/identity/."
+
+[[touchpoint.exception]]
+part = "theme.light"
+reason = "The deployment's stock API documentation pages at server.idfkit.com/docs and /redoc are served by the gateway framework and carry its own look; no visitor is sent to them, and they are outside this host. Recorded here, under the MCP property, as the one surface of the MCP product the standard does not reach."
+since = "identity-2026.1"
+
+[[touchpoint]]
+id = "docs"
+kind = "host"
+repository = "idfkit/idfkit-docs"
+host = "https://docs.idfkit.com"
+property_name = "EnergyPlus docs"
+mechanisms = ["material", "css"]
+declared_at = { path = "pyproject.toml", locator = "tool.idfkit.identity.level", form = "toml-key" }
+vendored = ["identity/"]
+identity_bearing = ["scripts/assets/**/*.css", "scripts/version_manager.py", "zensical.toml"]
+notes = "The material derivation serves every per-version site through scripts/convert.py; the css derivation serves the version picker scripts/version_manager.py writes. Both and hosts/docs.idfkit.com/ are placed under identity/ at the repository root."
+
+[[touchpoint]]
+id = "app"
+kind = "host"
+repository = "idfkit/idfkit-app"
+host = "https://app.idfkit.com"
+property_name = "Envelop"
+mechanisms = ["envelop"]
+declared_at = { path = "package.json", locator = "/idfkit/identity", form = "json-pointer" }
+vendored = ["src/identity/"]
+identity_bearing = ["src/**/*.css", "index.html"]
+notes = "The envelop derivation and hosts/app.idfkit.com/ are placed under src/identity/. The application's own rule against literals, scripts/design-rules/values.mjs, excludes src/identity/ and nothing else. The favicon set is copied from src/identity/hosts/app.idfkit.com/ into public/."
+
+[[touchpoint]]
+id = "auth"
+kind = "host"
+repository = "idfkit/idfkit-auth"
+host = "https://auth.idfkit.com"
+property_name = "Sign in"
+mechanisms = ["css", "stytch"]
+declared_at = { path = "package.json", locator = "/idfkit/identity", form = "json-pointer" }
+vendored = ["src/identity/"]
+identity_bearing = ["src/styles/**/*.css", "src/**/*.tsx", "index.html"]
+notes = "The css and stytch derivations and hosts/auth.idfkit.com/ are placed under src/identity/. The favicon set is copied into public/."
+
+[[touchpoint]]
+id = "shoebox"
+kind = "host"
+repository = "idfkit/idfkit-shoebox"
+host = "https://shoebox.idfkit.com"
+property_name = "Shoebox"
+mechanisms = ["css"]
+declared_at = { path = "package.json", locator = "/idfkit/identity", form = "json-pointer" }
+vendored = ["identity/"]
+identity_bearing = ["index.html", "src/**/*.css"]
+notes = "The css derivation and hosts/shoebox.idfkit.com/ are placed under identity/ at the repository root, which Vite serves as static files."
+
+# 4. READMEs. One per public repository with a root README, and the organisation profile. The
+# declaration is the tag inside the header's image addresses (research R15). `sentence` is the one
+# sentence the header carries and the social preview shows (FR-032a); assertion 5 compares them.
+
+[[touchpoint]]
+id = "readme-idfkit"
+kind = "readme"
+repository = "idfkit/idfkit"
+readme_kind = "library"
+sentence = "An EnergyPlus IDF and epJSON toolkit for Python, with no third-party dependencies."
+mechanisms = ["readme"]
+declared_at = { path = "README.md", locator = "releases/download/(identity-[0-9]{4}\\.[0-9]+)/", form = "image-url" }
+
+[[touchpoint]]
+id = "readme-idfkit-js"
+kind = "readme"
+repository = "idfkit/idfkit-js"
+readme_kind = "library"
+sentence = "EnergyPlus IDF and epJSON parsing and manipulation for JavaScript and TypeScript."
+mechanisms = ["readme"]
+declared_at = { path = "README.md", locator = "releases/download/(identity-[0-9]{4}\\.[0-9]+)/", form = "image-url" }
+
+[[touchpoint]]
+id = "readme-idfkit-mcp"
+kind = "readme"
+repository = "idfkit/idfkit-mcp"
+readme_kind = "service"
+sentence = "An MCP server that lets an AI assistant author, validate and simulate EnergyPlus models with idfkit."
+mechanisms = ["readme"]
+declared_at = { path = "README.md", locator = "releases/download/(identity-[0-9]{4}\\.[0-9]+)/", form = "image-url" }
+
+[[touchpoint]]
+id = "readme-idfkit-lsp"
+kind = "readme"
+repository = "idfkit/idfkit-lsp"
+readme_kind = "service"
+sentence = "A language server and VS Code extension for EnergyPlus development with idfkit."
+mechanisms = ["readme"]
+declared_at = { path = "README.md", locator = "releases/download/(identity-[0-9]{4}\\.[0-9]+)/", form = "image-url" }
+
+[[touchpoint]]
+id = "readme-idfkit-plugin"
+kind = "readme"
+repository = "idfkit/idfkit-plugin"
+readme_kind = "service"
+sentence = "A Claude Code and Codex plugin that bundles the idfkit MCP and language servers with skills for EnergyPlus modelling."
+mechanisms = ["readme"]
+declared_at = { path = "README.md", locator = "releases/download/(identity-[0-9]{4}\\.[0-9]+)/", form = "image-url" }
+
+[[touchpoint]]
+id = "readme-idfkit-docs"
+kind = "readme"
+repository = "idfkit/idfkit-docs"
+readme_kind = "site"
+sentence = "The EnergyPlus input and output reference, rendered by idfkit for every supported version."
+mechanisms = ["readme"]
+declared_at = { path = "README.md", locator = "releases/download/(identity-[0-9]{4}\\.[0-9]+)/", form = "image-url" }
+
+[[touchpoint]]
+id = "readme-idfkit-developers"
+kind = "readme"
+repository = "idfkit/idfkit-developers"
+readme_kind = "site"
+sentence = "The unified idfkit documentation site, for Python and JavaScript alike."
+mechanisms = ["readme"]
+declared_at = { path = "README.md", locator = "releases/download/(identity-[0-9]{4}\\.[0-9]+)/", form = "image-url" }
+
+[[touchpoint]]
+id = "readme-idfkit-com"
+kind = "readme"
+repository = "idfkit/idfkit.com"
+readme_kind = "site"
+sentence = "The idfkit website: the front door to the toolkit, the editor, the server and the documentation."
+mechanisms = ["readme"]
+declared_at = { path = "README.md", locator = "releases/download/(identity-[0-9]{4}\\.[0-9]+)/", form = "image-url" }
+
+[[touchpoint]]
+id = "readme-idfkit-shoebox"
+kind = "readme"
+repository = "idfkit/idfkit-shoebox"
+readme_kind = "site"
+sentence = "EnergyPlus in the browser: a client-side shoebox model on a drafting sheet."
+mechanisms = ["readme"]
+declared_at = { path = "README.md", locator = "releases/download/(identity-[0-9]{4}\\.[0-9]+)/", form = "image-url" }
+
+[[touchpoint]]
+id = "readme-idfkit-conformance"
+kind = "readme"
+repository = "idfkit/idfkit-conformance"
+# A service by badge set: it has releases (the governance tags) and a build, and no package on an
+# index, so the service row of readme-header.md section 2 fits it.
+readme_kind = "service"
+sentence = "The conformance corpus and governance registers that hold idfkit and idfkit-js to one behaviour."
+mechanisms = ["readme"]
+declared_at = { path = "README.md", locator = "releases/download/(identity-[0-9]{4}\\.[0-9]+)/", form = "image-url" }
+
+[[touchpoint]]
+id = "readme-idfkit-auth"
+kind = "readme"
+repository = "idfkit/idfkit-auth"
+readme_kind = "service"
+sentence = "The sign-in page for the hosted idfkit services, built on the provider's hosted widget."
+mechanisms = ["readme"]
+declared_at = { path = "README.md", locator = "releases/download/(identity-[0-9]{4}\\.[0-9]+)/", form = "image-url" }
+
+[[touchpoint]]
+id = "readme-profile"
+kind = "readme"
+repository = "idfkit/.github"
+readme_kind = "profile"
+sentence = "Open-source tooling for EnergyPlus building energy simulation, in Python, TypeScript and the browser."
+mechanisms = ["readme"]
+declared_at = { path = "profile/README.md", locator = "releases/download/(identity-[0-9]{4}\\.[0-9]+)/", form = "image-url" }

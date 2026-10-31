@@ -1,0 +1,72 @@
+# This repository holds the identity standard, not a package. The [project] table exists so that uv
+# can lock the development tools; `package = false` keeps it a virtual project with no build and no
+# src/. Its Python is mark.py, build.py and tools/, all standard library, as every tool in
+# idfkit-conformance is (plan, Technical Context).
+[project]
+name = "idfkit-brand"
+version = "0.0.0"
+description = "The idfkit visual identity standard: one token file, one mark, one build per rendering mechanism"
+requires-python = ">=3.12"
+dependencies = []
+
+[tool.uv]
+package = false
+
+[dependency-groups]
+dev = [
+    "pytest>=7.2.0",
+    "pytest-cov>=4.0.0",
+    "pre-commit>=2.20.0",
+    "pyright>=1.1.389",
+    "ruff>=0.11.5",
+]
+
+[tool.pyright]
+pythonVersion = "3.12"
+typeCheckingMode = "strict"
+include = ["mark.py", "build.py", "tools", "tests"]
+# tools/ is on sys.path at run time (the tools insert it, tests/conftest.py inserts it); this is how the type checker sees it.
+extraPaths = ["tools", "."]
+exclude = [".venv", "**/__pycache__", "dist"]
+# The tools read JSON and TOML, which arrive as `Any` and stay that way through every expression
+# that touches them before a reader turns them into a frozen dataclass. The "unknown type" family
+# is the noise that reading would otherwise drown in; the rules that catch a real mistake stay on,
+# as in idfkit-developers.
+reportUnknownMemberType = false
+reportUnknownVariableType = false
+reportUnknownArgumentType = false
+reportUnknownParameterType = false
+reportUnknownLambdaType = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 120
+fix = true
+extend-exclude = ["dist"]
+
+[tool.ruff.lint]
+select = ["YTT", "S", "B", "A", "C4", "T10", "SIM", "I", "C90", "E", "W", "F", "PGH", "UP", "RUF", "TRY"]
+ignore = ["E501", "E731"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101", "S603", "S607"]
+# The tools print, shell out to rsvg-convert and git with literal argument lists, and raise with
+# the long messages that are their output: a failing check must name the file, the offset and the
+# rule. Same waiver, same reason, as the scripts in idfkit-developers.
+# S105 fires on the string "fontWeight" assigned to a variable named token_type: a design token, not a secret.
+"tools/*" = ["T201", "TRY003", "S603", "S607", "S105"]
+"build.py" = ["T201", "TRY003", "S603", "S607"]
+"mark.py" = ["T201", "TRY003"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 18
+
+[tool.ruff.format]
+preview = true
+
+[tool.coverage.run]
+branch = true
+source = ["tools"]

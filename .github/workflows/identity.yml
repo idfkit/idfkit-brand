@@ -1,0 +1,108 @@
+# The standard's own gate and its release (contracts/identity-standard.md sections 3 and 4).
+#
+# On every pull request and push to main: the quality tools, the validator, the mark check and the
+# tests. On a tag matching identity-*: the same, then a build stamped with the tag, and a GitHub
+# release carrying one archive per mechanism directory and the five README images loose, so that
+# a README can address one by URL.
+#
+# librsvg is pinned by package version so that the rasters a tag ships are reproducible here; a
+# local build may differ in raster bytes, and the check compares rasters by pixel for that reason.
+
+name: identity
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+    tags: ["identity-*"]
+
+permissions:
+  contents: read
+
+env:
+  LIBRSVG_VERSION: "2.58.0+dfsg-1ubuntu0.1"
+
+jobs:
+  validate:
+    name: validate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install librsvg at the pinned version
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends --allow-downgrades "librsvg2-2=${LIBRSVG_VERSION}" "librsvg2-bin=${LIBRSVG_VERSION}"
+          rsvg-convert --version
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: .python-version
+
+      - name: Install
+        run: uv sync --locked
+
+      - name: Quality gate
+        run: make check
+
+      - name: Tests
+        run: make test
+
+  release:
+    name: build and release
+    needs: validate
+    if: startsWith(github.ref, 'refs/tags/identity-')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Refuse anything but an identity tag
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          if [[ ! "$tag" =~ ^identity-[0-9]{4}\.[0-9]+$ ]]; then
+            echo "::error title=Not an identity tag::'$tag' is not identity-YYYY.N."
+            exit 2
+          fi
+
+      - name: Install librsvg at the pinned version
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends --allow-downgrades "librsvg2-2=${LIBRSVG_VERSION}" "librsvg2-bin=${LIBRSVG_VERSION}"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: .python-version
+
+      - name: Validate the tagged commit
+        run: |
+          python tools/validate_identity.py
+          python mark.py --check
+
+      - name: Build at the tag
+        run: python build.py --out dist --tag "${GITHUB_REF_NAME}" --archive
+
+      - name: Create the release with its assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            --title "${GITHUB_REF_NAME}" \
+            --notes "The idfkit identity standard at ${GITHUB_REF_NAME}. One archive per rendering mechanism; the five README images are attached loose so that a README can address them by URL. Adopt it in a touchpoint through the identity-adopt skill." \
+            dist/archives/*.tar.gz \
+            dist/readme/mark-on-dark.svg \
+            dist/readme/mark-on-light.svg \
+            dist/readme/tile.svg \
+            dist/readme/lockup-on-dark.svg \
+            dist/readme/lockup-on-light.svg

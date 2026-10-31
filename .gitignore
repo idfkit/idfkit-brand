@@ -1,0 +1,18 @@
+# Built, never committed: dist/ is attached to each tag's release by identity.yml, and a derived
+# file in version control is a second copy of a fact (research R2).
+dist/
+sweep-report.json
+
+# Python
+__pycache__/
+*.py[codz]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+
+# Editors and systems
+.DS_Store
+.idea/
+.vscode/

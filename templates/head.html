@@ -1,0 +1,12 @@
+<!-- idfkit identity {{ tag }}: the favicon set, both theme colours and the social image of {{ host }}. Paths are relative to the host's root; the identity-adopt skill rewrites the prefix where a host serves this directory elsewhere. -->
+<link rel="icon" href="{{ prefix }}favicon.svg" type="image/svg+xml">
+<link rel="icon" href="{{ prefix }}favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="apple-touch-icon" href="{{ prefix }}apple-touch-icon.png">
+<link rel="manifest" href="{{ prefix }}manifest.webmanifest">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="{{ color.role.ground.light }}">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="{{ color.role.ground.dark }}">
+<meta property="og:image" content="{{ host }}{{ prefix }}og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="{{ host }}{{ prefix }}og.png">

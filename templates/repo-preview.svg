@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" width="1280" height="640" role="img" aria-label="{{ repository }}">
+  <!-- The social preview of one public repository (FR-032a): the lockup with the repository's name in the label face, its one sentence beneath in the text face, on the navy ground. The text is outlined by the build. -->
+  <rect width="1280" height="640" fill="{{ color.primitive.navy-950 }}"/>
+  <g transform="{{ lockup.transform }}">{{ lockup.svg }}</g>
+  {{ sentence.svg }}
+  {{ address.svg }}
+</svg>

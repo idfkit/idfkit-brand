@@ -1,0 +1,12 @@
+{
+  "name": "idfkit {{ property }}",
+  "short_name": "idfkit",
+  "icons": [
+    { "src": "{{ prefix }}icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "{{ prefix }}icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "theme_color": "{{ color.role.ground.dark }}",
+  "background_color": "{{ color.role.ground.dark }}",
+  "display": "standalone",
+  "start_url": "/"
+}

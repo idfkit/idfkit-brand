@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630" role="img" aria-label="idfkit {{ property }}">
+  <!-- The social image of one host: the lockup with the host's property name on the navy ground (research R11). Every value is a token name or a build variable; the text is outlined by the build. -->
+  <rect width="1200" height="630" fill="{{ color.primitive.navy-950 }}"/>
+  <g transform="{{ lockup.transform }}">{{ lockup.svg }}</g>
+  {{ host.svg }}
+</svg>

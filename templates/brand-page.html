@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>idfkit brand</title>
+<meta name="description" content="The idfkit visual identity: the mark, its rules, the colours in both themes, the typefaces, and the exceptions, at {{ tag }}.">
+<!--
+  The brand page (FR-034, research R16). build.py renders it from the standard at the tag; the
+  marketing site vendors it unchanged and serves it at /brand/. It expects the css derivation
+  beside it at css/ and its own images at brand-page/assets/, which is where the identity-adopt
+  skill places them on idfkit.com. Every value here is a token name or a build variable.
+-->
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/motion.css">
+<link rel="stylesheet" href="css/forced-colors.css">
+{{ head }}
+<style>
+  body { margin: 0; background: var(--idfkit-color-ground); color: var(--idfkit-color-ink); font-family: var(--idfkit-font-text); line-height: 1.6; }
+  main { max-width: 72rem; margin: 0 auto; padding: var(--idfkit-space-6) var(--idfkit-space-3) var(--idfkit-space-12); }
+  header.page { display: flex; align-items: center; justify-content: space-between; gap: var(--idfkit-space-3); flex-wrap: wrap; padding-bottom: var(--idfkit-space-3); border-bottom: 1px solid var(--idfkit-color-border); }
+  header.page svg { height: 2rem; width: auto; }
+  h1 { font-size: 2.25rem; font-weight: var(--idfkit-font-weight-extrabold); letter-spacing: -0.03em; margin: var(--idfkit-space-6) 0 var(--idfkit-space-1); }
+  h2 { font-size: 1.5rem; font-weight: var(--idfkit-font-weight-bold); letter-spacing: -0.02em; margin: var(--idfkit-space-8) 0 var(--idfkit-space-2); }
+  h3 { font-size: 1.05rem; font-weight: var(--idfkit-font-weight-semibold); margin: var(--idfkit-space-3) 0 var(--idfkit-space-1); }
+  p, li { max-width: 70ch; }
+  .lede { color: var(--idfkit-color-ink-muted); font-size: 1.1rem; }
+  .eyebrow { font-family: var(--idfkit-font-code); font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--idfkit-color-ink-label); }
+  a { color: var(--idfkit-color-link); }
+  a:focus-visible { outline: 2px solid var(--idfkit-color-focus); outline-offset: 2px; border-radius: var(--idfkit-radius-sm); }
+  code { font-family: var(--idfkit-font-code); font-size: 0.9em; background: var(--idfkit-color-surface-raised); padding: 0.1em 0.35em; border-radius: var(--idfkit-radius-sm); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); gap: var(--idfkit-space-2); }
+  .specimen { border: 1px solid var(--idfkit-color-border); border-radius: var(--idfkit-radius-lg); overflow: hidden; background: var(--idfkit-color-surface); }
+  .specimen .ground { display: flex; align-items: center; justify-content: center; height: 9rem; padding: var(--idfkit-space-2); }
+  .specimen .ground.dark { background: var(--idfkit-color-primitive-navy-950); }
+  .specimen .ground.light { background: var(--idfkit-color-primitive-white); }
+  .specimen .ground.split { background: linear-gradient(90deg, var(--idfkit-color-primitive-white) 50%, var(--idfkit-color-primitive-navy-950) 50%); }
+  .specimen img, .specimen svg { max-height: 6rem; max-width: 90%; }
+  .specimen .caption { padding: var(--idfkit-space-1) var(--idfkit-space-2); font-size: 0.85rem; display: flex; justify-content: space-between; gap: var(--idfkit-space-1); flex-wrap: wrap; }
+  .specimen .caption span { color: var(--idfkit-color-ink-muted); }
+  .no { position: relative; }
+  .no .ground::after { content: "incorrect"; position: absolute; top: var(--idfkit-space-1); right: var(--idfkit-space-1); font-family: var(--idfkit-font-code); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--idfkit-color-status-error); }
+  table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+  th, td { text-align: left; padding: var(--idfkit-space-1) var(--idfkit-space-2); border-bottom: 1px solid var(--idfkit-color-border); vertical-align: top; }
+  th { font-weight: var(--idfkit-font-weight-semibold); color: var(--idfkit-color-ink-muted); font-size: 0.8rem; }
+  .swatch { display: inline-block; width: 1.25rem; height: 1.25rem; border-radius: var(--idfkit-radius-sm); border: 1px solid var(--idfkit-color-border); vertical-align: middle; margin-right: var(--idfkit-space-1); }
+  .type-specimen { font-size: 2rem; line-height: 1.2; margin: var(--idfkit-space-1) 0; }
+  .type-specimen.code { font-family: var(--idfkit-font-code); font-size: 1.25rem; }
+  .idfkit-family { display: flex; gap: var(--idfkit-space-2); flex-wrap: wrap; font-size: 0.9rem; }
+  .idfkit-family a { color: var(--idfkit-color-ink-muted); text-decoration: none; }
+  .idfkit-family a[aria-current="page"] { color: var(--idfkit-color-accent); font-weight: var(--idfkit-font-weight-semibold); }
+  footer.page { margin-top: var(--idfkit-space-8); padding-top: var(--idfkit-space-3); border-top: 1px solid var(--idfkit-color-border); display: flex; flex-wrap: wrap; gap: var(--idfkit-space-2); justify-content: space-between; color: var(--idfkit-color-ink-muted); font-size: 0.9rem; }
+  .gradient { height: 3rem; border-radius: var(--idfkit-radius-md); background: linear-gradient(135deg, var(--idfkit-color-gradient-start) 0%, var(--idfkit-color-gradient-mid) 40%, var(--idfkit-color-gradient-end) 100%); }
+  .ratio-pass { color: var(--idfkit-color-status-success); font-family: var(--idfkit-font-code); }
+</style>
+</head>
+<body>
+<main>
+  <header class="page">
+    <a href="/" aria-label="idfkit">{{ lockup.inline }}</a>
+    {{ family_links }}
+  </header>
+
+  <p class="eyebrow">Brand · {{ tag }}</p>
+  <h1>The idfkit identity</h1>
+  <p class="lede">One mark, one accent, one pair of typefaces, on every idfkit host and repository. This page describes the standard at <code>{{ tag }}</code>, the version the site you are reading renders; every file here is generated from that tag and can be downloaded from its release.</p>
+
+  <h2 id="mark">The mark</h2>
+  <p>A block with one piece lifted out of its slot: a kit of parts that fit together, as an EnergyPlus model is objects assembled into a building. It is drawn on a 48-unit grid in one colour and is never drawn in two colours, never outlined, never rotated, and never given a gradient. Inline, it takes the colour of the surrounding text.</p>
+  <div class="grid">
+{{ mark_specimens }}
+  </div>
+
+  <h3>Clear space and minimum size</h3>
+  <ul>
+    <li>Clear space on every side of the mark or lockup is the width of the piece, which is 0.3 of the mark's ink height. Nothing else sits inside it.</li>
+    <li>The mark is never set smaller than 16 px. Below 24 px, use the tile, whose 16 and 32 px rasters are drawn on whole pixels.</li>
+    <li>The lockup is never set lower than 24 px.</li>
+  </ul>
+
+  <h3>The lockup and the property lockup</h3>
+  <p>The lockup is the mark's ink at 80 units, sitting on the wordmark's baseline, with a gap of 0.3 of the mark's height. The wordmark is "idfkit", lowercase, in Inter ExtraBold at -0.035 em, outlined. The name is written <strong>idfkit</strong>, in lowercase, everywhere it appears, including at the start of a sentence.</p>
+  <p>A product or property name appears only inside the lockup: the mark, the name, a divider, and the property name set in the label face. The property is told apart in words, never by a hue of its own.</p>
+  <div class="grid">
+{{ lockup_specimens }}
+  </div>
+
+  <h3>Incorrect uses</h3>
+  <div class="grid">
+{{ incorrect_specimens }}
+  </div>
+
+  <h2 id="colour">Colour</h2>
+  <p>Two themes, light and dark, following the visitor's system preference. One accent, the same hue in both themes and one step apart, for the current link, the primary action and focus. Every pair below is measured by the standard's validator at every release; the ratios are WCAG 2.1 contrast, and each meets its threshold in both themes.</p>
+  <div class="gradient" role="img" aria-label="The brand sweep, blue to violet to red"></div>
+  <p>The sweep is a surface for nothing that must be read: hairlines, a glow, the hero's bloom.</p>
+  <table>
+    <thead><tr><th>Role</th><th>Light</th><th>Dark</th><th>Usage</th></tr></thead>
+    <tbody>
+{{ color_rows }}
+    </tbody>
+  </table>
+  <h3>Measured pairs</h3>
+  <table>
+    <thead><tr><th>Pair</th><th>Threshold</th><th>Light</th><th>Dark</th></tr></thead>
+    <tbody>
+{{ pair_rows }}
+    </tbody>
+  </table>
+
+  <h2 id="type">Typefaces</h2>
+  <p><strong>{{ font.family.text }}</strong> for text, at the weights {{ text_weights }}; <strong>{{ font.family.code }}</strong> for code and labels, at {{ code_weights }}. Both are served from each host's own origin, as Latin subsets under the SIL Open Font License, with the fallback stacks below. No host loads a font from a third party.</p>
+  <p class="type-specimen">Modern tools for building energy simulation</p>
+  <p class="type-specimen code">load_idf("office.idf")</p>
+  <table>
+    <thead><tr><th>Role</th><th>Family</th><th>Fallback stack</th></tr></thead>
+    <tbody>
+      <tr><td>Text</td><td>{{ font.family.text }}</td><td><code>{{ stack.text }}</code></td></tr>
+      <tr><td>Code and labels</td><td>{{ font.family.code }}</td><td><code>{{ stack.code }}</code></td></tr>
+    </tbody>
+  </table>
+  <p>The files are in the <code>css.tar.gz</code> archive of the <a href="{{ release_url }}">{{ tag }} release</a>, under <code>fonts/</code>, with their licences.</p>
+
+  <h2 id="family">The family</h2>
+  <p>Every idfkit host carries these links, in this order, and marks the one you are on:</p>
+  {{ family_links }}
+  <p>Every host and repository carries the same statement of ownership: <em>{{ ownership }}</em></p>
+
+  <h2 id="exceptions">Exceptions</h2>
+  <p>Where a host's rendering mechanism cannot express part of the standard, the part and the reason are recorded here rather than left unstated. The list is complete: an unrecorded deviation fails that host's check.</p>
+{{ exceptions }}
+
+  <h2 id="version">This version</h2>
+  <p>This page describes <code>{{ tag }}</code>, cut on {{ date }}. The standard lives at <a href="https://github.com/idfkit/idfkit-brand">github.com/idfkit/idfkit-brand</a>; every host declares the version it renders in its own repository, and a check at that version fails when a rendered value differs from it. Files for this version: <a href="{{ release_url }}">the release</a>.</p>
+
+  <footer class="page">
+    <span>{{ ownership }}</span>
+    <span>identity {{ tag }}</span>
+  </footer>
+</main>
+</body>
+</html>

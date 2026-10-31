@@ -1,0 +1,60 @@
+{
+  "$comment": "The style schema of the sign-in provider's hosted widget, read from the package's type definitions. build.py resolves every leaf here from the tokens into dist/stytch/; what the standard has and this schema cannot express is an exception under `auth` in touchpoints.toml (research R14, FR-026).",
+  "package": "@stytch/core",
+  "version": "2.66.1",
+  "resolvedThrough": {
+    "@stytch/vanilla-js": "5.45.1",
+    "@stytch/react": "19.18.1"
+  },
+  "type": "StyleConfig",
+  "source": "dist/public/index.d.ts",
+  "readOn": "2026-10-30",
+  "properties": {
+    "container": {
+      "backgroundColor": "string",
+      "borderColor": "string",
+      "borderRadius": "string",
+      "width": "string"
+    },
+    "colors": {
+      "primary": "string",
+      "secondary": "string",
+      "accent": "string",
+      "success": "string",
+      "warning": "string",
+      "error": "string"
+    },
+    "buttons": {
+      "primary": {
+        "backgroundColor": "string",
+        "textColor": "string",
+        "borderColor": "string",
+        "borderRadius": "string"
+      },
+      "secondary": {
+        "backgroundColor": "string",
+        "textColor": "string",
+        "borderColor": "string",
+        "borderRadius": "string"
+      },
+      "disabled": {
+        "backgroundColor": "string",
+        "textColor": "string",
+        "borderColor": "string",
+        "borderRadius": "string"
+      }
+    },
+    "inputs": {
+      "backgroundColor": "string",
+      "textColor": "string",
+      "placeholderColor": "string",
+      "borderColor": "string",
+      "borderRadius": "string"
+    },
+    "fontFamily": "string",
+    "hideHeaderText": "boolean",
+    "logo": {
+      "logoImageUrl": "string"
+    }
+  }
+}
