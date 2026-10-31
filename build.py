@@ -444,7 +444,9 @@ def build_material(build: Build) -> None:
             "",
         ]),
     )
-    copy(build.root / "marks" / "mark.svg", out / "logo.svg")
+    # Material renders theme.logo through an <img>, where currentColor is black; the header is navy in both
+    # schemes, so the logo carries the on-dark ink.
+    copy(build.root / "marks" / "mark-on-dark.svg", out / "logo.svg")
     copy(build.root / "marks" / "tile.svg", out / "favicon.svg")
     links = "\n".join(f'  <a href="{link.href}">{html.escape(link.label)}</a>' for link in build.roster.family_links)
     write(

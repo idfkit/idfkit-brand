@@ -29,3 +29,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   metas included, without a finding.
 - `manifest.webmanifest` names its icons by addresses relative to itself, so a host that serves
   `hosts/<host>/` under a prefix (the marketing site at `/brand/hosts/idfkit.com/`) resolves them.
+- The material derivation's `logo.svg` is the mark in the on-dark ink: the theme renders it through an
+  `<img>`, where `currentColor` is black, and the header is navy in both schemes.

@@ -51,7 +51,7 @@ def test_css_derivation(dist: Path) -> None:
 
 
 @needs_rsvg
-def test_material_derivation(dist: Path) -> None:
+def test_material_derivation(dist: Path, root: Path) -> None:
     material = dist / "material"
     for name in (
         "material.css",
@@ -76,7 +76,8 @@ def test_material_derivation(dist: Path) -> None:
         assert css.count(f"  {prop}:") == 2, prop
     assert "primary: custom" in (material / "palette.yml").read_text(encoding="utf-8")
     assert "cards_layout_options:" in (material / "social.yml").read_text(encoding="utf-8")
-    assert "currentColor" in (material / "logo.svg").read_text(encoding="utf-8")
+    logo = (material / "logo.svg").read_text(encoding="utf-8")
+    assert "currentColor" not in logo and logo == (root / "marks" / "mark-on-dark.svg").read_text(encoding="utf-8")
     assert "EnergyPlus" in (material / "attribution.html").read_text(encoding="utf-8")
 
 
