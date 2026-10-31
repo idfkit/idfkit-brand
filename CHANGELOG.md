@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [identity-2026.3] - 2026-10-31
+
+The lockup stays legible on a phone and a tablet in every Material host.
+
 ### Fixed
 
 - The lockup below the themes' 76.25em breakpoint. The drawer squeezed it into a 1.6rem square, about
@@ -60,6 +64,7 @@ grounds and then the hosts rendering them, and accepted them after the correctio
 - Exceptions recorded in the roster: ten parts the hosted sign-in widget cannot express, the stock API
   pages of the MCP deployment, and the application's dark accent on its own raised surface.
 
-[Unreleased]: https://github.com/idfkit/idfkit-brand/compare/identity-2026.2...HEAD
+[Unreleased]: https://github.com/idfkit/idfkit-brand/compare/identity-2026.3...HEAD
+[identity-2026.3]: https://github.com/idfkit/idfkit-brand/compare/identity-2026.2...identity-2026.3
 [identity-2026.2]: https://github.com/idfkit/idfkit-brand/compare/identity-2026.1...identity-2026.2
 [identity-2026.1]: https://github.com/idfkit/idfkit-brand/releases/tag/identity-2026.1
