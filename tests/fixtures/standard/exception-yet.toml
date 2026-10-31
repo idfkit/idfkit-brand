@@ -9,7 +9,7 @@
 
 # 1. The ownership line every web touchpoint carries, naming the organisation (FR-020).
 
-ownership = "An idfkit project. MIT License."
+ownership = "An idfkit project."
 
 # 2. The family links, in the order every web touchpoint renders them (research R10, FR-019). The
 # sign-in host carries the links and is not among them.

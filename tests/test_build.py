@@ -48,7 +48,7 @@ def test_css_derivation(dist: Path) -> None:
     assert "forced-colors: active" in (css / "forced-colors.css").read_text(encoding="utf-8")
     links = (css / "family-links.html").read_text(encoding="utf-8")
     assert '<nav aria-label="idfkit"' in links and links.count("<a href=") == 7
-    assert "An idfkit project. MIT License." in (css / "ownership.html").read_text(encoding="utf-8")
+    assert "An idfkit project." in (css / "ownership.html").read_text(encoding="utf-8")
 
 
 @needs_rsvg
