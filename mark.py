@@ -79,6 +79,8 @@ LABEL_WEIGHT = 500
 X_HEIGHT_FRACTION = 0.70
 #: JetBrains Mono's x-height as a fraction of its em (550 of 1000 units), which sets the label size.
 LABEL_X_HEIGHT_FRACTION = 0.55
+#: The label face's descent below the baseline, as a fraction of its em, when no outline is given.
+LABEL_DESCENT_FRACTION = 0.3
 
 #: Clear space on every side is the piece's width, 0.3 of the ink height; minimum size 16 px;
 #: below 24 px the tile stands in for the bare mark.
@@ -225,6 +227,8 @@ class LabelOutline(Protocol):
 
     def width(self, size: float) -> float: ...
 
+    def descent(self, size: float) -> float: ...
+
     def svg(self, x: float, baseline_y: float, size: float, fill: str) -> str: ...
 
 
@@ -265,15 +269,19 @@ def property_lockup_parts(
             f'font-size="{font_size:.2f}" fill="{text_fill}">{name}</text>'
         )
         label_width = len(name) * font_size * 0.6
+        descent = font_size * LABEL_DESCENT_FRACTION
     else:
         label_markup = label.svg(label_x, g.baseline, font_size, text_fill)
         label_width = label.width(font_size)
+        descent = label.descent(font_size)
     markup = (
         f"{parts}"
         f'<rect x="{divider_x:.2f}" y="{g.baseline - x_height:.2f}" width="{DIVIDER_WIDTH:g}" height="{x_height:.2f}" fill="{divider}"/>'
         f"{label_markup}"
     )
-    return PropertyLockup(markup=markup, width=label_x + label_width, height=g.height)
+    # The wordmark has no descender, so the lockup's own height ends at the baseline; a property name
+    # with one ("Envelop", "Developers") reaches below it, and the viewBox must too.
+    return PropertyLockup(markup=markup, width=label_x + label_width, height=max(g.height, g.baseline + descent))
 
 
 def svg_property_lockup(

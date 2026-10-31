@@ -61,3 +61,14 @@ def test_the_property_lockup_sets_the_name_in_the_label_face() -> None:
     assert ">Developers</text>" in svg
     assert f'fill="{mark.DIVIDER_INK}"' in svg
     assert 'aria-label="idfkit Developers"' in svg
+
+
+def test_the_property_lockup_leaves_room_for_descenders(root: Path) -> None:
+    from glyphs import Font
+
+    label = Font.load(root / "fonts" / "build" / "jetbrains-mono-500.ttf").run("Envelop")
+    lockup = mark.property_lockup_parts(mark.INK_ON_DARK, "Envelop", mark.read_wordmark(), label)
+    plain = mark.lockup_geometry(mark.read_wordmark())
+    assert lockup.height > plain.baseline, "the p of Envelop reaches below the baseline"
+    svg = mark.svg_property_lockup(mark.INK_ON_DARK, "Envelop", mark.read_wordmark(), label)
+    assert f'viewBox="0 0 {lockup.width:.2f} {lockup.height:.2f}"' in svg

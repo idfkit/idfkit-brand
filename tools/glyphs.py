@@ -38,9 +38,14 @@ class TextRun:
     path: str
     advance: float
     units_per_em: int
+    descender: int = 0
 
     def width(self, size: float) -> float:
         return self.advance * size / self.units_per_em
+
+    def descent(self, size: float) -> float:
+        """How far below the baseline the face reaches at `size`, as a positive distance."""
+        return abs(self.descender) * size / self.units_per_em
 
     def transform(self, x: float, baseline_y: float, size: float) -> str:
         s = size / self.units_per_em
@@ -266,7 +271,9 @@ class Font:
             for contour in self.contours(glyph):
                 parts.append(contour_path(contour, x))
             x += self.advance(glyph) + tracking
-        return TextRun(path="".join(parts), advance=x - tracking, units_per_em=self.units_per_em)
+        return TextRun(
+            path="".join(parts), advance=x - tracking, units_per_em=self.units_per_em, descender=self.descender
+        )
 
     def measure(self, text: str) -> float:
         return sum(self.advance(self.glyph_id(c)) for c in text)
