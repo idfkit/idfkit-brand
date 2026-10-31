@@ -458,11 +458,11 @@ def build_material(build: Build) -> None:
     copy_fonts(build, out / "fonts")
 
 
+# The application's own role names (research R13). It has no link role: links render in `--accent`.
 ENVELOP_ROLES: tuple[tuple[str, str], ...] = (
     ("--accent", "--p-brand-accent"),
-    ("--accent-ink", "--p-brand-accent-ink"),
+    ("--accent-text", "--p-brand-accent-ink"),
     ("--focus", "--p-brand-focus"),
-    ("--link", "--p-brand-link"),
 )
 
 
@@ -501,8 +501,9 @@ def build_envelop(build: Build) -> None:
         "\n".join([
             f"# Roles over the brand primitives ({build.tag})",
             "",
-            "`src/index.css` imports `primitives.css` before its semantic roles and aliases these four roles to the",
+            "`src/index.css` imports `primitives.css` before its semantic roles and aliases these three roles to the",
             "brand primitives. No role name changes, and no role holds a literal; `tokens.test.ts` keeps proving it.",
+            "Links render in `--accent`; the application has no link role.",
             "",
             "| Role | Alias |",
             "| ---- | ----- |",
@@ -510,7 +511,8 @@ def build_envelop(build: Build) -> None:
             "",
             "Every other role keeps resolving to the application's own neutrals. `--p-brand-*` carries every role of",
             "the standard in both themes and every palette primitive, so a later change can alias more without a",
-            "new derivation.",
+            "new derivation. Where a brand value fails the application's own contrast floor on one of its own",
+            "surfaces, the application takes the nearest step of the same ramp and the roster records the exception.",
             "",
         ]),
     )

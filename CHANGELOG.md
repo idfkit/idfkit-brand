@@ -31,3 +31,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   `hosts/<host>/` under a prefix (the marketing site at `/brand/hosts/idfkit.com/`) resolves them.
 - The material derivation's `logo.svg` is the mark in the on-dark ink: the theme renders it through an
   `<img>`, where `currentColor` is black, and the header is navy in both schemes.
+- The application's roster entry scans the stylesheets beneath `src/index.css` and `index.html`, not
+  the token sheet where its own neutral primitives are declared; `roles.md` names the application's
+  roles (`--accent`, `--accent-text`, `--focus`); the dark accent on the application's raised surface
+  is recorded as an exception, the application taking blue-400 there.

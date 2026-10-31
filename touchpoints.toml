@@ -115,8 +115,13 @@ property_name = "Envelop"
 mechanisms = ["envelop"]
 declared_at = { path = "package.json", locator = "/idfkit/identity", form = "json-pointer" }
 vendored = ["src/identity/"]
-identity_bearing = ["src/**/*.css", "index.html"]
-notes = "The envelop derivation and hosts/app.idfkit.com/ are placed under src/identity/. The application's own rule against literals, scripts/design-rules/values.mjs, excludes src/identity/ and nothing else. The favicon set is copied from src/identity/hosts/app.idfkit.com/ into public/."
+identity_bearing = ["src/*/**/*.css", "index.html"]
+notes = "The envelop derivation and hosts/app.idfkit.com/ are placed under src/identity/. src/index.css is the application's own token sheet, where its neutral primitives are declared as literals by design, so the scan covers the stylesheets beneath it and index.html; the application's own rule against literals, scripts/design-rules/values.mjs, exempts that sheet and src/identity/ and nothing else. The favicon set is copied from src/identity/hosts/app.idfkit.com/ into public/."
+
+[[touchpoint.exception]]
+part = "color.role.accent"
+reason = "In the dark theme the role's value (blue-500, #3b82f6) measures 3.98:1 on the application's own raised surface (its neutral-800, #1e293b), under the 4.5:1 floor the application's token tests hold for links on that surface. The application aliases --accent in the dark theme to --p-brand-blue-400 (#60a5fa, 5.75:1), the next step of the same ramp; the light theme takes the role as declared."
+since = "identity-2026.1"
 
 [[touchpoint]]
 id = "auth"
