@@ -832,6 +832,10 @@ def host_lockup(build: Build, touchpoint: Touchpoint) -> tuple[str, float, float
     )
 
 
+#: The width below which the themes move the logo from the header to the drawer.
+MATERIAL_DRAWER_BREAKPOINT = "76.234375em"
+
+
 def lockup_css(build: Build, touchpoint: Touchpoint, width: float, height: float) -> str:
     """Paint lockup.svg in the surrounding text colour, sized by the mark's height.
 
@@ -850,6 +854,7 @@ def lockup_css(build: Build, touchpoint: Touchpoint, width: float, height: float
         f"  height: calc(var(--idfkit-lockup-mark, 1.25rem) * {ratio:.4f});",
         f"  margin-block-end: calc(var(--idfkit-lockup-mark, 1.25rem) * {1 - ratio:.4f});",
         f"  aspect-ratio: {width:.2f} / {height:.2f};",
+        "  max-width: 100%;",
         "  color: var(--idfkit-color-ink, currentColor);",
         "  background-color: currentColor;",
         '  -webkit-mask: url("lockup.svg") left top / contain no-repeat;',
@@ -876,10 +881,66 @@ def lockup_css(build: Build, touchpoint: Touchpoint, width: float, height: float
             "  visibility: hidden;",
             "}",
             "",
+            "/* Below this width the themes hide the header's logo and put it in a 1.6rem square in the drawer.",
+            "   The drawer gives the lockup its own row, and the header's first topic draws it instead. Both",
+            "   keep the mark's size until the space runs out, then fit it. */",
+            f"@media screen and (max-width: {MATERIAL_DRAWER_BREAKPOINT}) {{",
+            '  .md-nav .md-nav__title[for="__drawer"] {',
+            "    display: flex;",
+            "    flex-wrap: wrap;",
+            "    align-items: center;",
+            "    gap: 0.4rem;",
+            "    height: auto;",
+            "    padding: 0.8rem;",
+            "    font-size: 0;",
+            "    line-height: 1.5;",
+            "  }",
+            "",
+            '  .md-nav .md-nav__title[for="__drawer"] .md-logo {',
+            "    position: static;",
+            "    flex: 0 1 100%;",
+            "    width: 100%;",
+            "    height: auto;",
+            "    margin: 0;",
+            "    padding: 0;",
+            "  }",
+            "",
+            '  .md-nav .md-nav__title[for="__drawer"] .md-logo img {',
+            f"    width: min(100%, calc(1.2rem * {width / mark.LOCKUP_MARK_HEIGHT:.4f}));",
+            "    height: auto;",
+            f"    aspect-ratio: {width:.2f} / {height:.2f};",
+            "    margin-block-end: 0;",
+            "  }",
+            "",
+            "  .md-header__title .md-header__topic:first-child {",
+            "    width: 100%;",
+            "    height: 100%;",
+            "    align-items: center;",
+            "  }",
+            "",
+            "  .md-header__title .md-header__topic:first-child::before {",
+            '    content: "";',
+            "    flex: 0 1 auto;",
+            f"    width: min(100%, calc(1.2rem * {width / mark.LOCKUP_MARK_HEIGHT:.4f}));",
+            f"    aspect-ratio: {width:.2f} / {height:.2f};",
+            f"    transform: translateY({50 * (1 - 1 / ratio):.2f}%);",
+            "    background-color: currentColor;",
+            '    -webkit-mask: url("lockup.svg") left top / contain no-repeat;',
+            '    mask: url("lockup.svg") left top / contain no-repeat;',
+            "  }",
+            "",
+            "  .md-header__title .md-header__topic:first-child .md-ellipsis {",
+            "    display: none;",
+            "  }",
+            "}",
+            "",
         ]
     selectors = ".idfkit-lockup"
     if "material" in touchpoint.mechanisms:
-        selectors += ", .md-header__button.md-logo img, .md-nav__button.md-logo img"
+        selectors += (
+            ", .md-header__button.md-logo img, .md-nav__button.md-logo img"
+            ", .md-header__title .md-header__topic:first-child::before"
+        )
     lines += [
         "@media (forced-colors: active) {",
         f"  {selectors} {{",

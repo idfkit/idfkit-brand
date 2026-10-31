@@ -7,6 +7,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [identity-2026.3] - 2026-10-31
+
+The lockup stays legible on a phone and a tablet in every Material host.
+
+### Fixed
+
+- The lockup below the themes' 76.25em breakpoint. The drawer squeezed it into a 1.6rem square, about
+  2 px tall, and the header hid both the logo and the title, which left the header of a Material host
+  without a name on a phone or a tablet. The drawer now gives the lockup its own row, and the header's
+  first topic draws it. Both keep the 1.2rem mark until the space runs out, then fit it.
+- A lockup wider than its container, such as a large one on a phone, now fits the container.
+
 ## [identity-2026.2] - 2026-10-31
 
 The package READMEs join the standard, and every README header's fallback image becomes a raster.
@@ -52,6 +64,7 @@ grounds and then the hosts rendering them, and accepted them after the correctio
 - Exceptions recorded in the roster: ten parts the hosted sign-in widget cannot express, the stock API
   pages of the MCP deployment, and the application's dark accent on its own raised surface.
 
-[Unreleased]: https://github.com/idfkit/idfkit-brand/compare/identity-2026.2...HEAD
+[Unreleased]: https://github.com/idfkit/idfkit-brand/compare/identity-2026.3...HEAD
+[identity-2026.3]: https://github.com/idfkit/idfkit-brand/compare/identity-2026.2...identity-2026.3
 [identity-2026.2]: https://github.com/idfkit/idfkit-brand/compare/identity-2026.1...identity-2026.2
 [identity-2026.1]: https://github.com/idfkit/idfkit-brand/releases/tag/identity-2026.1

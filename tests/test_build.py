@@ -182,6 +182,12 @@ def test_hosts_derivation(dist: Path, root: Path) -> None:
         assert 'mask: url("lockup.svg")' in sheet and "background-color: CanvasText" in sheet
         assert "color: var(--idfkit-color-ink, currentColor);" in sheet, "a link's colour must not reach the lockup"
         assert (".md-logo img" in sheet) == ("material" in touchpoint.mechanisms), touchpoint.id
+        assert "max-width: 100%;" in sheet, "a lockup wider than a phone must fit it"
+        if "material" in touchpoint.mechanisms:
+            # The themes hide the header's logo below this width and square the drawer's.
+            narrow = sheet.split(f"@media screen and (max-width: {build_module.MATERIAL_DRAWER_BREAKPOINT})")[1]
+            assert '.md-nav__title[for="__drawer"] .md-logo img {' in narrow, touchpoint.id
+            assert ".md-header__topic:first-child::before {" in narrow, touchpoint.id
 
 
 @needs_rsvg
