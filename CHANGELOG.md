@@ -7,6 +7,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Review
+
+- 2026-10-31: the owner reviewed every graphic on the contact sheet on both grounds: the mark
+  variants, the favicons at 16 and 32 px, the tiles, the host social images, the repository
+  previews, the README images and the brand-page assets. Two corrections followed and were
+  rebuilt: the property lockup's viewBox now covers the label's descenders, and the word space
+  inside a two-word property name is 0.3 em. Every graphic is accepted; the first tag may be cut.
+
 ### Added
 
 - The standard: `identity.tokens.json` (both themes), `mark.py` with its committed masters, the
