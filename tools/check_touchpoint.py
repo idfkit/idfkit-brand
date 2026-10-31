@@ -5,7 +5,7 @@ and from the workspace by the identity-adopt skill against a `dist` built from t
 
     python idfkit-brand/tools/check_touchpoint.py --root idfkit.com --level identity-2026.1 --dist idfkit-brand/dist
 
-Five assertions, each a function returning typed findings:
+Six assertions, each a function returning typed findings:
 
   1. The repository is in the roster, with the kind and mechanisms the tree exhibits.
   2. The value at `declared_at` resolves, equals `--level`, and the tag exists.
@@ -16,6 +16,8 @@ Five assertions, each a function returning typed findings:
      an exception in the roster.
   5. For a readme touchpoint, the root README conforms to readme-header.md, its sentence equals the
      roster's, and a library README keeps its parity statement.
+  6. A host loads its generated lockup.css from the file `lockup_at` names, and no identity-bearing
+     file draws the mark by hand.
 
 It never compares `--level` against the latest tag (a touchpoint may be behind; the sweep says who
 is) and never reads the network. Exit 0 when every assertion holds; 1 naming every finding with its
@@ -44,6 +46,9 @@ EXIT_FINDINGS = 1
 EXIT_UNREADABLE = 2
 
 RELEASE_HOST = "https://github.com/idfkit/idfkit-brand/releases/download/"
+LOCKUP_STYLESHEET = "lockup.css"
+# The opening of the mark's larger path: present wherever the mark has been pasted into a page.
+MARK_PATH = "M4 15a3 3 0 0 1 3-3h17"
 HEX_LITERAL = re.compile(r"(?<![\w&{-])#(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})\b")
 FUNCTION_LITERAL = re.compile(r"\b(?:rgba?|hsla?|oklch|oklab)\(")
 JS_HEX_LITERAL = re.compile(r"\b0x[0-9a-fA-F]{6}\b")
@@ -596,6 +601,50 @@ def detect_repository(root: Path) -> str | None:
     return match.group(1) if match else None
 
 
+# 6. The lockup
+
+
+def check_lockup(root: Path, entry: Touchpoint) -> list[Finding]:
+    """The host renders the standard's lockup, not one assembled from the mark and live text."""
+    findings: list[Finding] = []
+    if not entry.lockup_at:
+        findings.append(Finding(6, f"the roster names no lockup_at for {entry.id}", "touchpoints.toml"))
+    for name in entry.lockup_at:
+        path = root / name
+        if not path.is_file():
+            findings.append(Finding(6, "the file that should load the lockup does not exist", name))
+        elif LOCKUP_STYLESHEET not in path.read_text(encoding="utf-8"):
+            findings.append(Finding(6, f"does not load the host's {LOCKUP_STYLESHEET}", name))
+    seen: set[Path] = set()
+    for pattern in (*entry.identity_bearing, *entry.lockup_at):
+        for path in sorted(root.glob(pattern)):
+            if (
+                path in seen
+                or not path.is_file()
+                or path.suffix not in TEXT_SUFFIXES
+                or _is_vendored(path, root, entry)
+            ):
+                continue
+            seen.add(path)
+            if any(part in ("node_modules", ".git", "dist", "site") for part in path.relative_to(root).parts):
+                continue
+            try:
+                lines = path.read_text(encoding="utf-8").splitlines()
+            except UnicodeDecodeError:
+                continue
+            for number, line in enumerate(lines, start=1):
+                if MARK_PATH in line:
+                    findings.append(
+                        Finding(
+                            6,
+                            "draws the mark by hand; use the host's generated lockup",
+                            str(path.relative_to(root)),
+                            str(number),
+                        )
+                    )
+    return findings
+
+
 def check(
     roster: Roster,
     repository: str,
@@ -618,6 +667,7 @@ def check(
             else:
                 findings += check_vendored(root, entry, dist, rasters)
             findings += check_literals(root, entry, dist)
+            findings += check_lockup(root, entry)
         else:
             findings += check_readme(root, entry, roster, level)
     return findings

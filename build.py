@@ -381,26 +381,6 @@ MATERIAL_ROLES: tuple[tuple[str, str], ...] = (
 )
 
 
-# The themes render theme.logo through an <img>, where currentColor is black, and their headers differ:
-# navy on the classic theme, the page's own ground on the modern one. So the image is painted as a
-# silhouette of the logo file in the surrounding text colour, on any header and in either scheme.
-MATERIAL_LOGO_CSS = """/* The logo takes the colour of the text around it, on any header (FR-018 under forced colours). */
-.md-logo img {
-  object-position: 200vw 0;
-  background-color: currentColor;
-  -webkit-mask: url("logo.svg") center / contain no-repeat;
-  mask: url("logo.svg") center / contain no-repeat;
-}
-
-@media (forced-colors: active) {
-  .md-logo img {
-    forced-color-adjust: none;
-    background-color: CanvasText;
-  }
-}
-"""
-
-
 def material_css(build: Build) -> str:
     tokens = build.tokens
     blocks = [
@@ -425,7 +405,6 @@ def material_css(build: Build) -> str:
             "",
         ]
         blocks.append("\n".join(lines))
-    blocks.append(MATERIAL_LOGO_CSS)
     return "\n".join(blocks)
 
 
@@ -465,7 +444,6 @@ def build_material(build: Build) -> None:
             "",
         ]),
     )
-    copy(build.root / "marks" / "mark.svg", out / "logo.svg")
     copy(build.root / "marks" / "tile.svg", out / "favicon.svg")
     links = "\n".join(f'  <a href="{link.href}">{html.escape(link.label)}</a>' for link in build.roster.family_links)
     write(
@@ -476,6 +454,9 @@ def build_material(build: Build) -> None:
     write(out / "fonts.css", fonts_css(build, "--idfkit-font-text", "--idfkit-font-code"))
     copy_fonts(build, out / "fonts")
 
+
+# The divider's weight against the lockup's ink, where the lockup is one colour.
+LOCKUP_DIVIDER_OPACITY = 0.5
 
 # The application's own role names (research R13). It has no link role: links render in `--accent`.
 ENVELOP_ROLES: tuple[tuple[str, str], ...] = (
@@ -602,14 +583,13 @@ def stytch_styles(build: Build, theme: ThemeId) -> dict[str, object]:
             "borderRadius": radius_md,
         },
         "hideHeaderText": False,
-        "logo": {"logoImageUrl": build.asset_url("lockup-on-dark.svg" if theme == "dark" else "lockup-on-light.svg")},
     }
 
 
 STYTCH_NOT_EXPRESSIBLE: tuple[tuple[str, str], ...] = (
     (
         "marks/mark.svg",
-        "the widget takes a logo image by URL; the mark cannot be inlined in currentColor or sized by the page",
+        "the widget's logo slot takes an image by URL and is left unset; the page's header carries the lockup",
     ),
     (
         "font.family.code",
@@ -646,7 +626,7 @@ def schema_coverage_md(build: Build, schema: Mapping[str, object]) -> str:
         for key, kind in node.items():
             path = f"{prefix}.{key}" if prefix else key
             if isinstance(kind, Mapping):
-                walk(kind, value[key] if isinstance(value, Mapping) else {}, path)
+                walk(kind, value.get(key, {}) if isinstance(value, Mapping) else {}, path)
             else:
                 set_value = value[key] if isinstance(value, Mapping) and key in value else None
                 lines.append(f"| `{path}` | `{set_value}` |" if set_value is not None else f"| `{path}` | not set |")
@@ -832,6 +812,84 @@ def build_repo_previews(build: Build) -> None:
             raise BuildError(f"{png} is not under 1 MB, which the social preview requires")
 
 
+def host_lockup(build: Build, touchpoint: Touchpoint) -> tuple[str, float, float]:
+    """This host's lockup in currentColor, its name outlined, so every host draws the same geometry."""
+    name = touchpoint.property_name
+    if not name:
+        geometry = mark.lockup_geometry(build.word)
+        return mark.svg_lockup("currentColor", build.word), geometry.width, geometry.height
+    label: TextRun = build.label_font.run(name, space_em=mark.LABEL_SPACE_EM)
+    lockup = mark.property_lockup_parts(
+        "currentColor", name, build.word, label, divider="currentColor", divider_opacity=LOCKUP_DIVIDER_OPACITY
+    )
+    return (
+        f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {lockup.width:.2f} {lockup.height:.2f}" role="img" '
+        f'aria-label="idfkit {html.escape(name)}">{lockup.markup}</svg>\n',
+        lockup.width,
+        lockup.height,
+    )
+
+
+def lockup_css(build: Build, touchpoint: Touchpoint, width: float, height: float) -> str:
+    """Paint lockup.svg in the surrounding text colour, sized by the mark's height.
+
+    The file is a mask, so a host pastes no geometry and names no colour. The lockup takes the standard's
+    ink, or the surrounding text where a host has no such property, and so never a link's colour. A name with a descender makes the file taller, so the height is
+    computed from the mark's, and a negative margin gives the layout the mark's height: the mark is the
+    same size and centres the same way whatever the name.
+    """
+    ratio = height / mark.LOCKUP_MARK_HEIGHT
+    lines = [
+        f"/* {build.header} The lockup of {touchpoint.host}, in the surrounding text colour. */",
+        "",
+        ".idfkit-lockup {",
+        "  display: inline-block;",
+        "  flex: none;",
+        f"  height: calc(var(--idfkit-lockup-mark, 1.25rem) * {ratio:.4f});",
+        f"  margin-block-end: calc(var(--idfkit-lockup-mark, 1.25rem) * {1 - ratio:.4f});",
+        f"  aspect-ratio: {width:.2f} / {height:.2f};",
+        "  color: var(--idfkit-color-ink, currentColor);",
+        "  background-color: currentColor;",
+        '  -webkit-mask: url("lockup.svg") left top / contain no-repeat;',
+        '  mask: url("lockup.svg") left top / contain no-repeat;',
+        "  print-color-adjust: exact;",
+        "}",
+        "",
+    ]
+    if "material" in touchpoint.mechanisms:
+        lines += [
+            "/* The themes render theme.logo through an <img>, where currentColor is black. The image is",
+            "   painted the same way, and the lockup replaces the site title beside it. */",
+            ".md-header__button.md-logo img, .md-nav__button.md-logo img {",
+            f"  height: calc(1.2rem * {ratio:.4f});",
+            f"  margin-block-end: calc(1.2rem * {1 - ratio:.4f});",
+            "  width: auto;",
+            "  object-position: 200vw 0;",
+            "  background-color: currentColor;",
+            '  -webkit-mask: url("lockup.svg") left top / contain no-repeat;',
+            '  mask: url("lockup.svg") left top / contain no-repeat;',
+            "}",
+            "",
+            ".md-header__title .md-header__topic:first-child .md-ellipsis {",
+            "  visibility: hidden;",
+            "}",
+            "",
+        ]
+    selectors = ".idfkit-lockup"
+    if "material" in touchpoint.mechanisms:
+        selectors += ", .md-header__button.md-logo img, .md-nav__button.md-logo img"
+    lines += [
+        "@media (forced-colors: active) {",
+        f"  {selectors} {{",
+        "    forced-color-adjust: none;",
+        "    background-color: CanvasText;",
+        "  }",
+        "}",
+        "",
+    ]
+    return "\n".join(lines)
+
+
 def build_hosts(build: Build) -> None:
     marks = build.root / "marks"
     small_tile = mark.svg_small_tile(
@@ -871,6 +929,9 @@ def build_hosts(build: Build) -> None:
             .replace('"name": "idfkit "', '"name": "idfkit"')
         )
         write(out / "manifest.webmanifest", manifest)
+        lockup_svg, lockup_width, lockup_height = host_lockup(build, touchpoint)
+        write(out / "lockup.svg", lockup_svg)
+        write(out / "lockup.css", lockup_css(build, touchpoint, lockup_width, lockup_height))
 
 
 # 5. The brand page

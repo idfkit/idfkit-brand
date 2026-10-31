@@ -51,13 +51,12 @@ def test_css_derivation(dist: Path) -> None:
 
 
 @needs_rsvg
-def test_material_derivation(dist: Path, root: Path) -> None:
+def test_material_derivation(dist: Path) -> None:
     material = dist / "material"
     for name in (
         "material.css",
         "palette.yml",
         "social.yml",
-        "logo.svg",
         "favicon.svg",
         "footer.html",
         "attribution.html",
@@ -76,9 +75,7 @@ def test_material_derivation(dist: Path, root: Path) -> None:
         assert css.count(f"  {prop}:") == 2, prop
     assert "primary: custom" in (material / "palette.yml").read_text(encoding="utf-8")
     assert "cards_layout_options:" in (material / "social.yml").read_text(encoding="utf-8")
-    logo = (material / "logo.svg").read_text(encoding="utf-8")
-    assert "currentColor" in logo and logo == (root / "marks" / "mark.svg").read_text(encoding="utf-8")
-    assert 'mask: url("logo.svg")' in css and "background-color: CanvasText" in css
+    assert not (material / "logo.svg").exists()
     assert "EnergyPlus" in (material / "attribution.html").read_text(encoding="utf-8")
 
 
@@ -114,6 +111,7 @@ def test_stytch_derivation(dist: Path, root: Path) -> None:
 
         assert keys(styles) <= keys(schema), name
         assert styles["buttons"]["primary"]["backgroundColor"] in ("#3b82f6", "#2563eb")
+        assert "logo" not in styles, "the page's header carries the lockup, so the widget shows no second one"
     coverage = (dist / "stytch" / "schema-coverage.md").read_text(encoding="utf-8")
     assert "## Not expressible" in coverage and "font.family.code" in coverage
 
@@ -159,6 +157,8 @@ def test_hosts_derivation(dist: Path, root: Path) -> None:
             "og.png",
             "head.html",
             "manifest.webmanifest",
+            "lockup.svg",
+            "lockup.css",
         ):
             assert (host / name).exists(), f"{touchpoint.id}: {name}"
         assert png_size((host / "og.png").read_bytes()) == (1200, 630)
@@ -169,6 +169,12 @@ def test_hosts_derivation(dist: Path, root: Path) -> None:
         assert manifest["name"].startswith("idfkit")
         # Icon addresses resolve relative to the manifest, so a host may serve the directory under a prefix.
         assert [icon["src"] for icon in manifest["icons"]] == ["icon-192.png", "icon-512.png"]
+        lockup = (host / "lockup.svg").read_text(encoding="utf-8")
+        assert "currentColor" in lockup and "#" not in lockup and "<text" not in lockup, touchpoint.id
+        sheet = (host / "lockup.css").read_text(encoding="utf-8")
+        assert 'mask: url("lockup.svg")' in sheet and "background-color: CanvasText" in sheet
+        assert "color: var(--idfkit-color-ink, currentColor);" in sheet, "a link's colour must not reach the lockup"
+        assert (".md-logo img" in sheet) == ("material" in touchpoint.mechanisms), touchpoint.id
 
 
 @needs_rsvg

@@ -21,7 +21,8 @@ def _material_touchpoint(tmp_path: Path, dist: Path) -> Path:
         '[project]\nname = "x"\n\n[tool.idfkit.identity]\nlevel = "identity-2026.1"\n', encoding="utf-8"
     )
     (root / "mkdocs.yml").write_text(
-        "site_name: idfkit\ntheme:\n  name: material\n  palette:\n    primary: custom\n", encoding="utf-8"
+        "site_name: idfkit\ntheme:\n  name: material\n  palette:\n    primary: custom\nextra_css:\n  - identity/hosts/developers.idfkit.com/lockup.css\n",
+        encoding="utf-8",
     )
     (root / "docs" / "stylesheets" / "extra.css").write_text(".md-grid { max-width: 70rem; }\n", encoding="utf-8")
     (root / "docs" / "overrides" / "partials" / "copyright.html").write_text(
@@ -41,7 +42,7 @@ def _css_touchpoint(tmp_path: Path, dist: Path) -> Path:
         json.dumps({"name": "idfkit-shoebox", "idfkit": {"identity": LEVEL}}, indent=2), encoding="utf-8"
     )
     (root / "index.html").write_text(
-        '<!doctype html><html><head><link rel="stylesheet" href="identity/css/tokens.css"></head><body></body></html>\n',
+        '<!doctype html><html><head><link rel="stylesheet" href="identity/css/tokens.css"><link rel="stylesheet" href="identity/hosts/shoebox.idfkit.com/lockup.css"></head><body></body></html>\n',
         encoding="utf-8",
     )
     (root / "src" / "sheet.css").write_text(":root { --sheet: var(--idfkit-color-surface); }\n", encoding="utf-8")
@@ -192,6 +193,29 @@ def test_a_marked_literal_with_a_matching_exception_passes(tmp_path: Path, dist:
         roster, "idfkit/idfkit-shoebox", touchpoint, LEVEL, dist, standard, "compare", "host", require_tag=False
     )
     assert len(findings) == 1 and "records no such exception" in findings[0].message
+
+
+def test_a_host_that_does_not_load_its_lockup_fails(tmp_path: Path, dist: Path, roster: Roster, root: Path) -> None:
+    touchpoint = _css_touchpoint(tmp_path, dist)
+    page = touchpoint / "index.html"
+    page.write_text(page.read_text(encoding="utf-8").replace("lockup.css", "other.css"), encoding="utf-8")
+    findings = ct.check(
+        roster, "idfkit/idfkit-shoebox", touchpoint, LEVEL, dist, root, "compare", "host", require_tag=False
+    )
+    assert [(f.assertion, f.file) for f in findings] == [(6, "index.html")]
+
+
+def test_a_hand_drawn_mark_fails_naming_file_and_line(tmp_path: Path, dist: Path, roster: Roster, root: Path) -> None:
+    touchpoint = _css_touchpoint(tmp_path, dist)
+    page = touchpoint / "index.html"
+    drawn = page.read_text(encoding="utf-8").replace(
+        "<body>", '<body>\n<svg viewBox="0 0 48 48"><path d="M4 15a3 3 0 0 1 3-3h17v12h12v17"/></svg>'
+    )
+    page.write_text(drawn, encoding="utf-8")
+    findings = ct.check(
+        roster, "idfkit/idfkit-shoebox", touchpoint, LEVEL, dist, root, "compare", "host", require_tag=False
+    )
+    assert [(f.assertion, f.file, f.place) for f in findings] == [(6, "index.html", "2")]
 
 
 def test_a_font_host_and_a_js_colour_fail(tmp_path: Path, dist: Path, roster: Roster, root: Path) -> None:

@@ -251,6 +251,7 @@ def property_lockup_parts(
     label: LabelOutline | None = None,
     divider: str = DIVIDER_INK,
     label_fill: str | None = None,
+    divider_opacity: float | None = None,
 ) -> PropertyLockup:
     """The lockup, a divider, and the property name in the label face (FR-012, research R7).
 
@@ -277,9 +278,10 @@ def property_lockup_parts(
         label_markup = label.svg(label_x, g.baseline, font_size, text_fill)
         label_width = label.width(font_size)
         descent = label.descent(font_size)
+    muted = f' fill-opacity="{divider_opacity:g}"' if divider_opacity is not None else ""
     markup = (
         f"{parts}"
-        f'<rect x="{divider_x:.2f}" y="{g.baseline - x_height:.2f}" width="{DIVIDER_WIDTH:g}" height="{x_height:.2f}" fill="{divider}"/>'
+        f'<rect x="{divider_x:.2f}" y="{g.baseline - x_height:.2f}" width="{DIVIDER_WIDTH:g}" height="{x_height:.2f}" fill="{divider}"{muted}/>'
         f"{label_markup}"
     )
     # The wordmark has no descender, so the lockup's own height ends at the baseline; a property name

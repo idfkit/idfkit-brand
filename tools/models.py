@@ -238,6 +238,7 @@ class Touchpoint:
     property_name: str | None = None
     vendored: tuple[str, ...] = ()
     identity_bearing: tuple[str, ...] = ()
+    lockup_at: tuple[str, ...] = ()
     readme_kind: str | None = None
     sentence: str | None = None
     notes: str | None = None
@@ -503,6 +504,7 @@ def _touchpoint(raw: Mapping[str, Any], index: int) -> Touchpoint:
         property_name=property_name if isinstance(property_name, str) else None,
         vendored=tuple(raw.get("vendored", ())),
         identity_bearing=tuple(raw.get("identity_bearing", ())),
+        lockup_at=tuple(raw.get("lockup_at", ())),
         readme_kind=readme_kind if isinstance(readme_kind, str) else None,
         sentence=sentence if isinstance(sentence, str) else None,
         notes=raw.get("notes") if isinstance(raw.get("notes"), str) else None,

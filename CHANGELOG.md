@@ -29,8 +29,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   metas included, without a finding.
 - `manifest.webmanifest` names its icons by addresses relative to itself, so a host that serves
   `hosts/<host>/` under a prefix (the marketing site at `/brand/hosts/idfkit.com/`) resolves them.
-- `material.css` paints the theme's logo image as a silhouette of `logo.svg` in the surrounding text
-  colour: the themes render it through an `<img>`, where `currentColor` is black, and their headers differ.
+- Every host has a generated `lockup.svg`, its name outlined, and a `lockup.css` that paints it in the
+  surrounding text colour, so the gap and the name's size are the same everywhere. The Material sites
+  show it in place of the logo and site title, and the material derivation no longer carries `logo.svg`.
+- Assertion 6 of `tools/check_touchpoint.py`: a host loads its `lockup.css` and draws no mark by hand.
+- The brand page's header lockup takes the ink, not the link colour, and the sign-in widget carries no
+  logo, because the page's header already carries the lockup.
 - The application's roster entry scans the stylesheets beneath `src/index.css` and `index.html`, not
   the token sheet where its own neutral primitives are declared; `roles.md` names the application's
   roles (`--accent`, `--accent-text`, `--focus`); the dark accent on the application's raised surface
