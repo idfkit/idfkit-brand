@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import re
 import shutil
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -175,6 +176,14 @@ def test_hosts_derivation(dist: Path, root: Path) -> None:
         assert 'mask: url("lockup.svg")' in sheet and "background-color: CanvasText" in sheet
         assert "color: var(--idfkit-color-ink, currentColor);" in sheet, "a link's colour must not reach the lockup"
         assert (".md-logo img" in sheet) == ("material" in touchpoint.mechanisms), touchpoint.id
+
+
+@needs_rsvg
+def test_brand_page_is_dated_by_the_commit_so_a_rebuilt_tag_is_identical(dist: Path, root: Path) -> None:
+    committed = subprocess.run(
+        ["git", "-C", str(root), "show", "-s", "--format=%cs", "HEAD"], capture_output=True, text=True, check=True
+    ).stdout.strip()
+    assert f"cut on {committed}." in (dist / "brand-page" / "index.html").read_text(encoding="utf-8")
 
 
 @needs_rsvg

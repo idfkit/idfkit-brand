@@ -1282,13 +1282,29 @@ def compare(a: Path, b: Path) -> list[Difference]:
 # 8. Entry points
 
 
+def commit_date(root: Path) -> str:
+    """The date of the commit being built, so that rebuilding a tag on any later day gives the same bytes.
+
+    Outside a checkout (an exported tree) there is no commit to ask, and the build falls back to today.
+    """
+    result = subprocess.run(
+        ["git", "-C", str(root), "show", "-s", "--format=%cs", "HEAD"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    return (
+        result.stdout.strip() if result.returncode == 0 and result.stdout.strip() else datetime.date.today().isoformat()
+    )
+
+
 def load_build(root: Path, out: Path, tag: str) -> Build:
     tokens = load_tokens(root / "identity.tokens.json")
     roster = load_roster(root / "touchpoints.toml")
     word = mark.read_wordmark(root / "marks" / "wordmark.svg")
     label_font = Font.load(root / "fonts" / "build" / "jetbrains-mono-500.ttf")
     text_font = Font.load(root / "fonts" / "build" / "inter-400.ttf")
-    date = datetime.date.today().isoformat() if tag != UNRELEASED else "an unreleased working tree"
+    date = commit_date(root) if tag != UNRELEASED else "an unreleased working tree"
     return Build(
         root=root,
         out=out,
