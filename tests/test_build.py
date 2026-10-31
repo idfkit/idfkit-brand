@@ -165,6 +165,8 @@ def test_hosts_derivation(dist: Path, root: Path) -> None:
         assert 'property="og:image"' in head and (touchpoint.host or "") in head and "identity-2026.1" in head
         manifest = json.loads((host / "manifest.webmanifest").read_text(encoding="utf-8"))
         assert manifest["name"].startswith("idfkit")
+        # Icon addresses resolve relative to the manifest, so a host may serve the directory under a prefix.
+        assert [icon["src"] for icon in manifest["icons"]] == ["icon-192.png", "icon-512.png"]
 
 
 @needs_rsvg
