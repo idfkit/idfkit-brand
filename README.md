@@ -48,8 +48,9 @@ git tag identity-2026.1 && git push origin identity-2026.1
 ```
 
 `identity.yml` builds `dist/` at the tag and creates the GitHub release with one archive per
-mechanism directory and the five README images attached loose, so that a README can address one by
-URL. A tag never moves; a mistake is a new tag.
+mechanism directory and the five images attached loose for download. A README addresses the masters
+in `marks/` at the tag instead, since a browser will not display an SVG served as a release asset. A
+tag never moves once a touchpoint declares it; a mistake is a new tag.
 
 ## 4. How to adopt one
 

@@ -240,6 +240,27 @@ def test_a_conforming_library_readme_passes(tmp_path: Path, fixtures: Path, rost
     assert findings == [], [f.render() for f in findings]
 
 
+def test_a_release_asset_address_fails_because_a_browser_will_not_display_it(
+    tmp_path: Path, fixtures: Path, roster: Roster, root: Path
+) -> None:
+    (tmp_path / "README.md").write_text(
+        (fixtures / "touchpoints" / "library-readme.md")
+        .read_text(encoding="utf-8")
+        .replace(
+            "https://raw.githubusercontent.com/idfkit/idfkit-brand/identity-2026.1/marks/",
+            "https://github.com/idfkit/idfkit-brand/releases/download/identity-2026.1/",
+        ),
+        encoding="utf-8",
+    )
+    findings = ct.check(roster, "idfkit/idfkit", tmp_path, LEVEL, None, root, "compare", "readme", require_tag=False)
+    assert findings and all(f.assertion in (2, 5) for f in findings)
+
+
+def test_every_address_a_readme_may_use_exists_in_marks(root: Path) -> None:
+    for name in ("mark-on-dark.svg", "mark-on-light.svg", "tile.svg", "lockup-on-dark.svg", "lockup-on-light.svg"):
+        assert (root / "marks" / name).is_file(), name
+
+
 def test_a_readme_missing_its_heading_fails(tmp_path: Path, fixtures: Path, roster: Roster, root: Path) -> None:
     touchpoint = tmp_path / "idfkit"
     touchpoint.mkdir()
@@ -269,7 +290,7 @@ def test_a_readme_at_another_tag_fails_on_its_declaration(
     text = (
         (fixtures / "touchpoints" / "library-readme.md")
         .read_text(encoding="utf-8")
-        .replace("identity-2026.1/mark-on-dark", "identity-2026.2/mark-on-dark")
+        .replace("identity-2026.1/marks/mark-on-dark", "identity-2026.2/marks/mark-on-dark")
     )
     (touchpoint / "README.md").write_text(text, encoding="utf-8")
     findings = ct.check(roster, "idfkit/idfkit", touchpoint, LEVEL, None, root, "compare", "readme", require_tag=False)

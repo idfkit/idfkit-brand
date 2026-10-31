@@ -51,7 +51,7 @@ def workspace(tmp_path: Path, root: Path) -> Path:
     idfkit = tmp_path / "idfkit"
     idfkit.mkdir()
     (idfkit / "README.md").write_text(
-        '<img src="https://github.com/idfkit/idfkit-brand/releases/download/identity-2026.1/tile.svg">\n',
+        '<img src="https://raw.githubusercontent.com/idfkit/idfkit-brand/identity-2026.1/marks/tile.svg">\n',
         encoding="utf-8",
     )
     # the application, under its folder alias, with a not-yet lag
