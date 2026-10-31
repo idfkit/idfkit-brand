@@ -132,52 +132,52 @@ notes = "The css and stytch derivations and hosts/auth.idfkit.com/ are placed un
 
 [[touchpoint.exception]]
 part = "marks/mark.svg"
-reason = "the hosted widget takes a logo image by URL; the mark cannot be inlined in currentColor or sized by the page. Schema: @stytch/core 2.66.1 (the StyleConfig that @stytch/react 19.5.2 renders)."
+reason = "the hosted widget takes a logo image by URL; the mark cannot be inlined in currentColor or sized by the page. Schema: @stytch/core 2.66.1, StyleConfig."
 since = "identity-2026.1"
 
 [[touchpoint.exception]]
 part = "font.family.code"
-reason = "the hosted widget takes one fontFamily for all its text; code and labels cannot be set in the label face. Schema: @stytch/core 2.66.1 (the StyleConfig that @stytch/react 19.5.2 renders)."
+reason = "the hosted widget takes one fontFamily for all its text; code and labels cannot be set in the label face. Schema: @stytch/core 2.66.1, StyleConfig."
 since = "identity-2026.1"
 
 [[touchpoint.exception]]
 part = "font.weight.semibold"
-reason = "the hosted widget takes a family, not weights; its buttons and headings render at the provider's own weights. Schema: @stytch/core 2.66.1 (the StyleConfig that @stytch/react 19.5.2 renders)."
+reason = "the hosted widget takes a family, not weights; its buttons and headings render at the provider's own weights. Schema: @stytch/core 2.66.1, StyleConfig."
 since = "identity-2026.1"
 
 [[touchpoint.exception]]
 part = "color.role.focus"
-reason = "the hosted widget draws its own focus ring; the schema exposes no focus colour. Schema: @stytch/core 2.66.1 (the StyleConfig that @stytch/react 19.5.2 renders)."
+reason = "the hosted widget draws its own focus ring; the schema exposes no focus colour. Schema: @stytch/core 2.66.1, StyleConfig."
 since = "identity-2026.1"
 
 [[touchpoint.exception]]
 part = "color.role.link"
-reason = "links inside the hosted widget take the provider's default; the schema exposes no link colour. Schema: @stytch/core 2.66.1 (the StyleConfig that @stytch/react 19.5.2 renders)."
+reason = "links inside the hosted widget take the provider's default; the schema exposes no link colour. Schema: @stytch/core 2.66.1, StyleConfig."
 since = "identity-2026.1"
 
 [[touchpoint.exception]]
 part = "family_links"
-reason = "the hosted widget renders no navigation; the page around it carries the family links. Schema: @stytch/core 2.66.1 (the StyleConfig that @stytch/react 19.5.2 renders)."
+reason = "the hosted widget renders no navigation; the page around it carries the family links. Schema: @stytch/core 2.66.1, StyleConfig."
 since = "identity-2026.1"
 
 [[touchpoint.exception]]
 part = "ownership"
-reason = "the hosted widget renders its own footer; the page around it carries the ownership line. Schema: @stytch/core 2.66.1 (the StyleConfig that @stytch/react 19.5.2 renders)."
+reason = "the hosted widget renders its own footer; the page around it carries the ownership line. Schema: @stytch/core 2.66.1, StyleConfig."
 since = "identity-2026.1"
 
 [[touchpoint.exception]]
 part = "motion.duration.base"
-reason = "the hosted widget's transitions are the provider's; the schema exposes no motion. Schema: @stytch/core 2.66.1 (the StyleConfig that @stytch/react 19.5.2 renders)."
+reason = "the hosted widget's transitions are the provider's; the schema exposes no motion. Schema: @stytch/core 2.66.1, StyleConfig."
 since = "identity-2026.1"
 
 [[touchpoint.exception]]
 part = "elevation.raised"
-reason = "the hosted widget's container has no shadow property. Schema: @stytch/core 2.66.1 (the StyleConfig that @stytch/react 19.5.2 renders)."
+reason = "the hosted widget's container has no shadow property. Schema: @stytch/core 2.66.1, StyleConfig."
 since = "identity-2026.1"
 
 [[touchpoint.exception]]
 part = "space.2"
-reason = "the hosted widget's internal spacing is the provider's; the schema exposes only the container width. Schema: @stytch/core 2.66.1 (the StyleConfig that @stytch/react 19.5.2 renders)."
+reason = "the hosted widget's internal spacing is the provider's; the schema exposes only the container width. Schema: @stytch/core 2.66.1, StyleConfig."
 since = "identity-2026.1"
 
 [[touchpoint]]
