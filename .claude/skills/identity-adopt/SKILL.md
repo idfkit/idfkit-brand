@@ -24,6 +24,10 @@ copying anything. The touchpoint's checkout is the folder named after the reposi
 
 For a `readme` touchpoint, skip to step 7.
 
+A repository may hold both a host touchpoint and a README touchpoint. Move them together, on one
+branch: the check reads the header's addresses as the same declaration, so a host at the new tag
+fails assertions 2 and 5 until step 7 has also run on its README.
+
 ## 2. Build the tag in this checkout
 
 ```bash
