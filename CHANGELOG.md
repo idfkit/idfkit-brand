@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [identity-2026.2] - 2026-10-31
+
+The package READMEs join the standard, and every README header's fallback image becomes a raster.
+
 ### Added
 
 - `marks/tile.png`, the tile as a 256 px raster, committed beside its master, compared by decoded
@@ -48,5 +52,6 @@ grounds and then the hosts rendering them, and accepted them after the correctio
 - Exceptions recorded in the roster: ten parts the hosted sign-in widget cannot express, the stock API
   pages of the MCP deployment, and the application's dark accent on its own raised surface.
 
-[Unreleased]: https://github.com/idfkit/idfkit-brand/compare/identity-2026.1...HEAD
+[Unreleased]: https://github.com/idfkit/idfkit-brand/compare/identity-2026.2...HEAD
+[identity-2026.2]: https://github.com/idfkit/idfkit-brand/compare/identity-2026.1...identity-2026.2
 [identity-2026.1]: https://github.com/idfkit/idfkit-brand/releases/tag/identity-2026.1
