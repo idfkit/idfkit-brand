@@ -2,7 +2,7 @@
 #
 # On every pull request and push to main: the quality tools, the validator, the mark check and the
 # tests. On a tag matching identity-*: the same, then a build stamped with the tag, and a GitHub
-# release carrying one archive per mechanism directory and the five README images loose, so that
+# release carrying one archive per mechanism directory and the six README images loose, so that
 # the brand page can offer one for download. A README addresses the masters in marks/ at the tag.
 #
 # librsvg is pinned by package version so that the rasters a tag ships are reproducible here; a
@@ -99,10 +99,11 @@ jobs:
         run: |
           gh release create "${GITHUB_REF_NAME}" \
             --title "${GITHUB_REF_NAME}" \
-            --notes "The idfkit identity standard at ${GITHUB_REF_NAME}. One archive per rendering mechanism; the five images are attached loose for download; a README addresses the masters in marks/ at the tag. Adopt it in a touchpoint through the identity-adopt skill." \
+            --notes "The idfkit identity standard at ${GITHUB_REF_NAME}. One archive per rendering mechanism; the six images are attached loose for download; a README addresses the masters in marks/ at the tag. Adopt it in a touchpoint through the identity-adopt skill." \
             dist/archives/*.tar.gz \
             dist/readme/mark-on-dark.svg \
             dist/readme/mark-on-light.svg \
             dist/readme/tile.svg \
+            dist/readme/tile.png \
             dist/readme/lockup-on-dark.svg \
             dist/readme/lockup-on-light.svg

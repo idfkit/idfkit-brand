@@ -4,12 +4,32 @@ from __future__ import annotations
 
 import json
 import shutil
+import struct
+import zlib
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
 import pytest
 import validate_identity as vi
+from rasters import Raster, decode_png
+
+needs_rsvg = pytest.mark.skipif(shutil.which("rsvg-convert") is None, reason="rsvg-convert is not on PATH")
+
+
+def _encode_png(raster: Raster, level: int = 6) -> bytes:
+    """The raster as a PNG with unfiltered rows, so that a test can change a pixel or only the compression."""
+
+    def chunk(name: bytes, body: bytes) -> bytes:
+        return struct.pack(">I", len(body)) + name + body + struct.pack(">I", zlib.crc32(name + body))
+
+    stride = raster.width * raster.channels
+    rows = b"".join(b"\0" + raster.pixels[y * stride : (y + 1) * stride] for y in range(raster.height))
+    colour = {1: 0, 2: 4, 3: 2, 4: 6}[raster.channels]
+    header = struct.pack(">IIBBBBB", raster.width, raster.height, 8, colour, 0, 0, 0)
+    return (
+        b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", header) + chunk(b"IDAT", zlib.compress(rows, level)) + chunk(b"IEND", b"")
+    )
 
 
 def _write_tokens(root: Path, mutate: Callable[[dict[str, Any]], object]) -> None:
@@ -90,6 +110,68 @@ def test_an_edited_master_fails(standard_copy: Path) -> None:
     target.write_text(target.read_text(encoding="utf-8").replace('rx="112.64"', 'rx="100"'), encoding="utf-8")
     report = vi.validate(standard_copy)
     assert any(f.check == "marks" and "tile.svg" in f.message for f in report.findings)
+
+
+@needs_rsvg
+def test_an_edited_raster_tile_fails_by_pixel(standard_copy: Path) -> None:
+    target = standard_copy / "marks" / "tile.png"
+    raster = decode_png(target.read_bytes())
+    pixels = bytearray(raster.pixels)
+    pixels[len(pixels) // 2] ^= 0xFF
+    target.write_bytes(_encode_png(Raster(raster.width, raster.height, raster.channels, bytes(pixels))))
+    report = vi.validate(standard_copy)
+    assert any(f.check == "marks" and f.where == "marks/tile.png" and "pixel" in f.message for f in report.findings)
+
+
+@needs_rsvg
+def test_a_recompressed_raster_tile_passes(standard_copy: Path) -> None:
+    target = standard_copy / "marks" / "tile.png"
+    recompressed = _encode_png(decode_png(target.read_bytes()), level=1)
+    assert recompressed != target.read_bytes()
+    target.write_bytes(recompressed)
+    assert not [f for f in vi.validate(standard_copy).findings if f.check == "marks"]
+
+
+def test_a_missing_raster_tile_fails(standard_copy: Path) -> None:
+    (standard_copy / "marks" / "tile.png").unlink()
+    report = vi.validate(standard_copy)
+    assert any(f.check == "marks" and f.where == "marks/tile.png" for f in report.findings)
+
+
+def test_a_root_readme_in_a_private_repository_is_refused(standard_copy: Path) -> None:
+    path = standard_copy / "touchpoints.toml"
+    path.write_text(
+        path.read_text(encoding="utf-8")
+        + """
+[[touchpoint]]
+id = "readme-idfkit-engine"
+kind = "readme"
+repository = "idfkit/idfkit-engine"
+readme_kind = "library"
+sentence = "A private repository's root README."
+mechanisms = ["readme"]
+declared_at = { path = "README.md", locator = "idfkit-brand/(identity-[0-9]{4}\\\\.[0-9]+)/marks/", form = "image-url" }
+""",
+        encoding="utf-8",
+    )
+    report = vi.validate(standard_copy)
+    assert any(f.check == "roster" and "private" in f.message for f in report.findings)
+
+
+def test_a_package_entry_naming_a_root_readme_is_refused(standard_copy: Path) -> None:
+    path = standard_copy / "touchpoints.toml"
+    text = path.read_text(encoding="utf-8").replace('path = "packages/core/README.md"', 'path = "README.md"')
+    path.write_text(text, encoding="utf-8")
+    report = vi.validate(standard_copy)
+    assert any(f.check == "roster" and "root README" in f.message for f in report.findings)
+
+
+def test_a_package_entry_without_its_installed_name_is_refused(standard_copy: Path) -> None:
+    path = standard_copy / "touchpoints.toml"
+    text = path.read_text(encoding="utf-8").replace('package_name = "@idfkit/core"\n', "")
+    path.write_text(text, encoding="utf-8")
+    report = vi.validate(standard_copy)
+    assert any(f.check == "roster" and "package_name" in f.where for f in report.findings)
 
 
 def test_cli_exit_codes(root: Path, standard_copy: Path, capsys: pytest.CaptureFixture[str]) -> None:

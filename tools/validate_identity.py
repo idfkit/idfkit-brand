@@ -21,14 +21,18 @@ from __future__ import annotations
 import argparse
 import importlib.util
 import re
+import shutil
 import sys
+import tempfile
 from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
+from types import ModuleType
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from models import THEMES, ColorValue, Pair, ShapeError, ThemeId, TokenFile, load_roster, load_tokens
+from rasters import compare_png
 
 HERE = Path(__file__).resolve().parent.parent
 
@@ -184,6 +188,24 @@ def _load_mark_module(root: Path):
     return module
 
 
+def check_tile_raster(root: Path, mark: ModuleType) -> list[Finding]:
+    """The committed raster is the tile master at its size, compared by decoded pixels."""
+    png = root / "marks" / mark.TILE_RASTER
+    where = f"marks/{mark.TILE_RASTER}"
+    if not png.exists():
+        return [Finding("marks", where, "missing; run `python mark.py --write`")]
+    if shutil.which("rsvg-convert") is None:
+        return [Finding("marks", where, "cannot be compared: rsvg-convert is not on PATH; install librsvg")]
+    with tempfile.TemporaryDirectory() as scratch:
+        expected = Path(scratch) / mark.TILE_RASTER
+        mark.rasterize_tile(root / "marks" / "tile.svg", expected)
+        difference = compare_png(png.read_bytes(), expected.read_bytes())
+    if difference is None:
+        return []
+    rendered = difference if isinstance(difference, str) else difference.render()
+    return [Finding("marks", where, f"differs from marks/tile.svg: {rendered}; run `python mark.py --write`")]
+
+
 def check_marks(root: Path, tokens: TokenFile | None) -> list[Finding]:
     if not (root / "mark.py").exists():
         return [Finding("marks", "mark.py", "missing")]
@@ -196,6 +218,7 @@ def check_marks(root: Path, tokens: TokenFile | None) -> list[Finding]:
                 "marks", "marks/", "differs from mark.py for " + ", ".join(differing) + "; run `python mark.py --write`"
             )
         )
+    findings += check_tile_raster(root, mark)
     if tokens is not None:
         expected = {
             "INK_ON_DARK": "color.primitive.slate-200",

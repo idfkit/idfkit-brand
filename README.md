@@ -12,7 +12,7 @@ repository and nowhere else.
 | `identity.tokens.json` | every colour (both themes), type, spacing, radius, elevation and motion value, in the Design Tokens Community Group format |
 | `mark.py`, `marks/` | the mark's geometry and the SVG masters generated from it; `marks/wordmark.svg` is the one outlined, committed master |
 | `fonts/` | Inter and JetBrains Mono as Latin woff2 subsets with their licences, and TTF copies the build sets text with |
-| `touchpoints.toml` | the roster: the family links, the ownership line, every host and README, their exceptions. Never a level |
+| `touchpoints.toml` | the roster: the family links, the ownership line, every host, every root README and every published package's README, their exceptions. Never a level |
 | `templates/` | the social images, the head fragment, the family links, the footer, the brand page |
 | `build.py` | source to `dist/`: `css`, `material`, `envelop`, `stytch`, `hero`, `readme`, `repo-preview`, `hosts`, `brand-page`, and the local contact sheet `review/` |
 | `tools/` | `validate_identity.py` (the gate), `check_touchpoint.py` (the six assertions a touchpoint's CI runs), `sweep_touchpoints.py` (who is behind) |
@@ -48,7 +48,7 @@ git tag identity-2026.1 && git push origin identity-2026.1
 ```
 
 `identity.yml` builds `dist/` at the tag and creates the GitHub release with one archive per
-mechanism directory and the five images attached loose for download. A README addresses the masters
+mechanism directory and the six images attached loose for download. A README addresses the masters
 in `marks/` at the tag instead, since a browser will not display an SVG served as a release asset. A
 tag never moves once a touchpoint declares it; a mistake is a new tag.
 
@@ -59,7 +59,7 @@ Adoption is a procedure the maintainer runs through an agent, not a script in th
 - **`identity-adopt`** (`.claude/skills/identity-adopt/`): given a touchpoint id and a tag, reads
   the roster entry, builds the tag here, copies `dist/` into the touchpoint's vendored paths, moves
   its declaration and its check workflow's ref, runs `tools/check_touchpoint.py` against the local
-  `dist`, and opens the pull request. A README touchpoint changes three image addresses instead.
+  `dist`, and opens the pull request. A README touchpoint changes three image addresses instead, and the package READMEs of its repository move with it.
 - **`identity-sweep`** (`.claude/skills/identity-sweep/`): reads every touchpoint's declared tag
   from its own checkout and reports who is behind, with the stated lag or `unexplained`.
 

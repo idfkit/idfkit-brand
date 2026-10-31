@@ -30,7 +30,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from check_touchpoint import read_declaration
-from models import LAG_KINDS, Lag, Roster, Touchpoint, load_roster
+from models import LAG_KINDS, PRIVATE_REPOSITORIES, Lag, Roster, Touchpoint, load_roster
 
 STANDARD_ROOT = Path(__file__).resolve().parent.parent
 EXIT_UNEXPLAINED = 1
@@ -131,7 +131,7 @@ def sweep_one(touchpoint: Touchpoint, workspace: Path, latest: str) -> Swept:
         return Swept(
             id=touchpoint.id,
             repository=touchpoint.repository,
-            kind=touchpoint.kind,
+            kind="package" if touchpoint.readme_kind == "package" else touchpoint.kind,
             folder=str(folder),
             declared=declared,
             latest=latest,
@@ -141,7 +141,8 @@ def sweep_one(touchpoint: Touchpoint, workspace: Path, latest: str) -> Swept:
         )
 
     if not folder.is_dir():
-        return swept(None, "unreachable", note="no checkout in the workspace")
+        private = "a private repository, with " if touchpoint.repository in PRIVATE_REPOSITORIES else ""
+        return swept(None, "unreachable", note=f"{private}no checkout in the workspace")
     declared, error = read_declaration(folder, touchpoint)
     if declared is None:
         return swept(None, "unexplained" if touchpoint.kind == "host" else "behind", note=f"undeclared: {error}")

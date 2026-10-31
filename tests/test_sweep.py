@@ -85,6 +85,8 @@ def test_sweep_reports_every_state(workspace: Path) -> None:
     assert by_id["readme-idfkit"].status == "behind"
     assert by_id["app"].status == "lagging" and by_id["app"].lag is not None and by_id["app"].lag.issue
     assert by_id["docs"].status == "unreachable"
+    assert by_id["package-core"].kind == "package"
+    assert by_id["package-engine"].status == "unreachable" and "private" in (by_id["package-engine"].note or "")
     assert [t.id for t in report.unexplained] == ["shoebox"]
     assert "docs" in [t.id for t in report.unreachable]
 

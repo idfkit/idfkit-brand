@@ -24,6 +24,10 @@ copying anything. The touchpoint's checkout is the folder named after the reposi
 
 For a `readme` touchpoint, skip to step 7.
 
+A repository may hold both a host touchpoint and a README touchpoint. Move them together, on one
+branch: the check reads the header's addresses as the same declaration, so a host at the new tag
+fails assertions 2 and 5 until step 7 has also run on its README.
+
 ## 2. Build the tag in this checkout
 
 ```bash
@@ -118,3 +122,9 @@ python idfkit-brand/tools/check_touchpoint.py --root <touchpoint> --level <tag> 
 ```
 
 and continue at step 6.
+
+A repository may hold several README entries, its root README and one per package it publishes
+(`readme_kind = "package"`, section 7 of that contract). They move together, because the check runs
+over all of them. A package README is the file at the entry's `declared_at.path`. Where a generator
+writes it, as `scripts/emit-types.mjs` does in `idfkit-js`, change the generator and regenerate. A
+private repository has package entries only: its root README stays outside until it is public.
