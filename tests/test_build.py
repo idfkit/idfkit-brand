@@ -77,7 +77,8 @@ def test_material_derivation(dist: Path, root: Path) -> None:
     assert "primary: custom" in (material / "palette.yml").read_text(encoding="utf-8")
     assert "cards_layout_options:" in (material / "social.yml").read_text(encoding="utf-8")
     logo = (material / "logo.svg").read_text(encoding="utf-8")
-    assert "currentColor" not in logo and logo == (root / "marks" / "mark-on-dark.svg").read_text(encoding="utf-8")
+    assert "currentColor" in logo and logo == (root / "marks" / "mark.svg").read_text(encoding="utf-8")
+    assert 'mask: url("logo.svg")' in css and "background-color: CanvasText" in css
     assert "EnergyPlus" in (material / "attribution.html").read_text(encoding="utf-8")
 
 

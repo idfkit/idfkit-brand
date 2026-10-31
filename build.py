@@ -381,6 +381,26 @@ MATERIAL_ROLES: tuple[tuple[str, str], ...] = (
 )
 
 
+# The themes render theme.logo through an <img>, where currentColor is black, and their headers differ:
+# navy on the classic theme, the page's own ground on the modern one. So the image is painted as a
+# silhouette of the logo file in the surrounding text colour, on any header and in either scheme.
+MATERIAL_LOGO_CSS = """/* The logo takes the colour of the text around it, on any header (FR-018 under forced colours). */
+.md-logo img {
+  object-position: 200vw 0;
+  background-color: currentColor;
+  -webkit-mask: url("logo.svg") center / contain no-repeat;
+  mask: url("logo.svg") center / contain no-repeat;
+}
+
+@media (forced-colors: active) {
+  .md-logo img {
+    forced-color-adjust: none;
+    background-color: CanvasText;
+  }
+}
+"""
+
+
 def material_css(build: Build) -> str:
     tokens = build.tokens
     blocks = [
@@ -405,6 +425,7 @@ def material_css(build: Build) -> str:
             "",
         ]
         blocks.append("\n".join(lines))
+    blocks.append(MATERIAL_LOGO_CSS)
     return "\n".join(blocks)
 
 
@@ -444,9 +465,7 @@ def build_material(build: Build) -> None:
             "",
         ]),
     )
-    # Material renders theme.logo through an <img>, where currentColor is black; the header is navy in both
-    # schemes, so the logo carries the on-dark ink.
-    copy(build.root / "marks" / "mark-on-dark.svg", out / "logo.svg")
+    copy(build.root / "marks" / "mark.svg", out / "logo.svg")
     copy(build.root / "marks" / "tile.svg", out / "favicon.svg")
     links = "\n".join(f'  <a href="{link.href}">{html.escape(link.label)}</a>' for link in build.roster.family_links)
     write(
