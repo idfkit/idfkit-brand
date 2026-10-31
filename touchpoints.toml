@@ -50,8 +50,9 @@ label = "GitHub"
 href = "https://github.com/idfkit"
 
 # 3. Hosts. `vendored` paths are compared byte for byte against the tag's dist (assertion 3);
-# `identity_bearing` globs are scanned for stray literals (assertion 4). `notes` is what the
-# identity-adopt skill reads before copying.
+# `identity_bearing` globs are scanned for stray literals (assertion 4); `lockup_at` names the file
+# that loads the host's generated lockup.css (assertion 6). `notes` is what the identity-adopt skill
+# reads before copying.
 
 [[touchpoint]]
 id = "idfkit-com"
@@ -63,6 +64,7 @@ mechanisms = ["css", "hero"]
 declared_at = { path = "brand/identity.json", locator = "/level", form = "json-pointer" }
 vendored = ["brand/css/", "brand/hero/", "brand/hosts/", "brand/brand-page/"]
 identity_bearing = ["css/**/*.css", "js/**/*.js", "index.html", "docs/**/*.html"]
+lockup_at = ["index.html"]
 notes = "The site serves brand/hosts/idfkit.com/ at /brand/hosts/idfkit.com/, so head.html's paths are rewritten to that prefix at adoption. brand/brand-page/index.html is also copied to brand/index.html so that /brand/ resolves; adoption keeps the two identical."
 
 [[touchpoint]]
@@ -75,6 +77,7 @@ mechanisms = ["material"]
 declared_at = { path = "pyproject.toml", locator = "tool.idfkit.identity.level", form = "toml-key" }
 vendored = ["docs/identity/"]
 identity_bearing = ["docs/stylesheets/**/*.css", "docs/overrides/**/*.html", "mkdocs.yml"]
+lockup_at = ["mkdocs.yml"]
 notes = "The material derivation and hosts/developers.idfkit.com/ are placed under docs/identity/ so that the site stays buildable from docs/ and mkdocs.yml alone (constitution, Documentation Architecture). The footer partial keeps the pinned-levels line beneath the ownership line."
 
 [[touchpoint]]
@@ -87,6 +90,7 @@ mechanisms = ["material"]
 declared_at = { path = "pyproject.toml", locator = "tool.idfkit.identity.level", form = "toml-key" }
 vendored = ["docs/identity/"]
 identity_bearing = ["docs/stylesheets/**/*.css", "docs/overrides/**/*.html", "mkdocs.yml"]
+lockup_at = ["mkdocs.yml"]
 notes = "Same placement as developers: docs/identity/."
 
 [[touchpoint.exception]]
@@ -104,6 +108,7 @@ mechanisms = ["material", "css"]
 declared_at = { path = "pyproject.toml", locator = "tool.idfkit.identity.level", form = "toml-key" }
 vendored = ["identity/"]
 identity_bearing = ["scripts/assets/**/*.css", "scripts/version_manager.py", "zensical.toml"]
+lockup_at = ["scripts/identity.py"]
 notes = "The material derivation serves every per-version site through scripts/convert.py; the css derivation serves the version picker scripts/version_manager.py writes. Both and hosts/docs.idfkit.com/ are placed under identity/ at the repository root."
 
 [[touchpoint]]
@@ -115,8 +120,14 @@ property_name = "Envelop"
 mechanisms = ["envelop"]
 declared_at = { path = "package.json", locator = "/idfkit/identity", form = "json-pointer" }
 vendored = ["src/identity/"]
-identity_bearing = ["src/**/*.css", "index.html"]
-notes = "The envelop derivation and hosts/app.idfkit.com/ are placed under src/identity/. The application's own rule against literals, scripts/design-rules/values.mjs, excludes src/identity/ and nothing else. The favicon set is copied from src/identity/hosts/app.idfkit.com/ into public/."
+identity_bearing = ["src/*/**/*.css", "index.html"]
+lockup_at = ["src/index.css"]
+notes = "The envelop derivation and hosts/app.idfkit.com/ are placed under src/identity/. src/index.css is the application's own token sheet, where its neutral primitives are declared as literals by design, so the scan covers the stylesheets beneath it and index.html; the application's own rule against literals, scripts/design-rules/values.mjs, exempts that sheet and src/identity/ and nothing else. The favicon set is copied from src/identity/hosts/app.idfkit.com/ into public/."
+
+[[touchpoint.exception]]
+part = "color.role.accent"
+reason = "In the dark theme the role's value (blue-500, #3b82f6) measures 3.98:1 on the application's own raised surface (its neutral-800, #1e293b), under the 4.5:1 floor the application's token tests hold for links on that surface. The application aliases --accent in the dark theme to --p-brand-blue-400 (#60a5fa, 5.75:1), the next step of the same ramp; the light theme takes the role as declared."
+since = "identity-2026.1"
 
 [[touchpoint]]
 id = "auth"
@@ -128,7 +139,58 @@ mechanisms = ["css", "stytch"]
 declared_at = { path = "package.json", locator = "/idfkit/identity", form = "json-pointer" }
 vendored = ["src/identity/"]
 identity_bearing = ["src/styles/**/*.css", "src/**/*.tsx", "index.html"]
+lockup_at = ["index.html"]
 notes = "The css and stytch derivations and hosts/auth.idfkit.com/ are placed under src/identity/. The favicon set is copied into public/."
+
+[[touchpoint.exception]]
+part = "marks/mark.svg"
+reason = "the hosted widget's logo slot takes an image by URL and is left unset; the page's header carries the lockup. Schema: @stytch/core 2.66.1, StyleConfig."
+since = "identity-2026.1"
+
+[[touchpoint.exception]]
+part = "font.family.code"
+reason = "the hosted widget takes one fontFamily for all its text; code and labels cannot be set in the label face. Schema: @stytch/core 2.66.1, StyleConfig."
+since = "identity-2026.1"
+
+[[touchpoint.exception]]
+part = "font.weight.semibold"
+reason = "the hosted widget takes a family, not weights; its buttons and headings render at the provider's own weights. Schema: @stytch/core 2.66.1, StyleConfig."
+since = "identity-2026.1"
+
+[[touchpoint.exception]]
+part = "color.role.focus"
+reason = "the hosted widget draws its own focus ring; the schema exposes no focus colour. Schema: @stytch/core 2.66.1, StyleConfig."
+since = "identity-2026.1"
+
+[[touchpoint.exception]]
+part = "color.role.link"
+reason = "links inside the hosted widget take the provider's default; the schema exposes no link colour. Schema: @stytch/core 2.66.1, StyleConfig."
+since = "identity-2026.1"
+
+[[touchpoint.exception]]
+part = "family_links"
+reason = "the hosted widget renders no navigation; the page around it carries the family links. Schema: @stytch/core 2.66.1, StyleConfig."
+since = "identity-2026.1"
+
+[[touchpoint.exception]]
+part = "ownership"
+reason = "the hosted widget renders its own footer; the page around it carries the ownership line. Schema: @stytch/core 2.66.1, StyleConfig."
+since = "identity-2026.1"
+
+[[touchpoint.exception]]
+part = "motion.duration.base"
+reason = "the hosted widget's transitions are the provider's; the schema exposes no motion. Schema: @stytch/core 2.66.1, StyleConfig."
+since = "identity-2026.1"
+
+[[touchpoint.exception]]
+part = "elevation.raised"
+reason = "the hosted widget's container has no shadow property. Schema: @stytch/core 2.66.1, StyleConfig."
+since = "identity-2026.1"
+
+[[touchpoint.exception]]
+part = "space.2"
+reason = "the hosted widget's internal spacing is the provider's; the schema exposes only the container width. Schema: @stytch/core 2.66.1, StyleConfig."
+since = "identity-2026.1"
 
 [[touchpoint]]
 id = "shoebox"
@@ -140,6 +202,7 @@ mechanisms = ["css"]
 declared_at = { path = "package.json", locator = "/idfkit/identity", form = "json-pointer" }
 vendored = ["identity/"]
 identity_bearing = ["index.html", "src/**/*.css"]
+lockup_at = ["index.html"]
 notes = "The css derivation and hosts/shoebox.idfkit.com/ are placed under identity/ at the repository root, which Vite serves as static files."
 
 # 4. READMEs. One per public repository with a root README, and the organisation profile. The

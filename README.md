@@ -15,7 +15,7 @@ repository and nowhere else.
 | `touchpoints.toml` | the roster: the family links, the ownership line, every host and README, their exceptions. Never a level |
 | `templates/` | the social images, the head fragment, the family links, the footer, the brand page |
 | `build.py` | source to `dist/`: `css`, `material`, `envelop`, `stytch`, `hero`, `readme`, `repo-preview`, `hosts`, `brand-page`, and the local contact sheet `review/` |
-| `tools/` | `validate_identity.py` (the gate), `check_touchpoint.py` (the five assertions a touchpoint's CI runs), `sweep_touchpoints.py` (who is behind) |
+| `tools/` | `validate_identity.py` (the gate), `check_touchpoint.py` (the six assertions a touchpoint's CI runs), `sweep_touchpoints.py` (who is behind) |
 | `design/` | the direction comparison and the mark exploration, as PDF |
 
 The contracts that fix each of these are in the planning repository, under
