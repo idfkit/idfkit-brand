@@ -7,6 +7,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [identity-2026.4] - 2026-11-01
+
+The brand page and the sign-in widget fit a phone, and the Material header centres its lockup without a
+fractional transform.
+
+### Fixed
+
+- The brand page no longer widens past a phone. Its tokens table made the page 469 px wide at every
+  phone width; each table now scrolls inside its own box, and a colour role's usage takes its own line
+  under the role instead of a column 120 px wide, which made each row about 340 px tall.
+- The Stytch widget takes its width from the page instead of a fixed 400 px, which overflowed a phone
+  by 33 px at 375 px and clipped the widget's right edge. The host limits the width.
+- The Material header's lockup is centred with a negative margin instead of a percentage transform.
+  The transform placed the mark on a fraction of a pixel, and an engine could render it a third of a
+  pixel off the header's centre.
+
 ## [identity-2026.3] - 2026-10-31
 
 The lockup stays legible on a phone and a tablet in every Material host.
