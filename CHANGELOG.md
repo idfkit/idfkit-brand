@@ -7,6 +7,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [identity-2026.4] - 2026-11-01
+
+The brand page and the sign-in widget fit a phone, and the Material header centres its lockup without a
+fractional transform.
+
 ### Fixed
 
 - The brand page no longer widens past a phone. Its tokens table made the page 469 px wide at every
