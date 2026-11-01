@@ -546,7 +546,7 @@ def stytch_styles(build: Build, theme: ThemeId) -> dict[str, object]:
             "backgroundColor": c("color.role.surface"),
             "borderColor": c("color.role.border"),
             "borderRadius": str(t.get("radius.lg").value),
-            "width": "400px",
+            "width": "100%",
         },
         "colors": {
             "primary": c("color.role.ink"),
@@ -923,7 +923,7 @@ def lockup_css(build: Build, touchpoint: Touchpoint, width: float, height: float
             "    flex: 0 1 auto;",
             f"    width: min(100%, calc(1.2rem * {width / mark.LOCKUP_MARK_HEIGHT:.4f}));",
             f"    aspect-ratio: {width:.2f} / {height:.2f};",
-            f"    transform: translateY({50 * (1 - 1 / ratio):.2f}%);",
+            f"    margin-block-end: calc(min(100%, calc(1.2rem * {width / mark.LOCKUP_MARK_HEIGHT:.4f})) * {(mark.LOCKUP_MARK_HEIGHT - height) / width:.6f});",
             "    background-color: currentColor;",
             '    -webkit-mask: url("lockup.svg") left top / contain no-repeat;',
             '    mask: url("lockup.svg") left top / contain no-repeat;',

@@ -42,9 +42,17 @@
   .specimen .caption span { color: var(--idfkit-color-ink-muted); }
   .no { position: relative; }
   .no .ground::after { content: "incorrect"; position: absolute; top: var(--idfkit-space-1); right: var(--idfkit-space-1); font-family: var(--idfkit-font-code); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--idfkit-color-status-error); }
+  .table-scroll { overflow-x: auto; }
   table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
   th, td { text-align: left; padding: var(--idfkit-space-1) var(--idfkit-space-2); border-bottom: 1px solid var(--idfkit-color-border); vertical-align: top; }
   th { font-weight: var(--idfkit-font-weight-semibold); color: var(--idfkit-color-ink-muted); font-size: 0.8rem; }
+  /* On a phone a role's usage takes its own line under the role, instead of a column too narrow to read. */
+  @media (max-width: 40rem) {
+    .role-table tr { display: grid; grid-template-columns: minmax(0, 1fr) 5.5rem 5.5rem; column-gap: var(--idfkit-space-half); padding-block: var(--idfkit-space-1); border-bottom: 1px solid var(--idfkit-color-border); }
+    .role-table th, .role-table td { padding: 0; border-bottom: 0; }
+    .role-table th:last-child { display: none; }
+    .role-table td:last-child { grid-column: 1 / -1; padding-block-start: var(--idfkit-space-half); color: var(--idfkit-color-ink-muted); }
+  }
   .swatch { display: inline-block; width: 1.25rem; height: 1.25rem; border-radius: var(--idfkit-radius-sm); border: 1px solid var(--idfkit-color-border); vertical-align: middle; margin-right: var(--idfkit-space-1); }
   .type-specimen { font-size: 2rem; line-height: 1.2; margin: var(--idfkit-space-1) 0; }
   .type-specimen.code { font-family: var(--idfkit-font-code); font-size: 1.25rem; }
@@ -96,31 +104,31 @@
   <p>Two themes, light and dark, following the visitor's system preference. One accent, the same hue in both themes and one step apart, for the current link, the primary action and focus. Every pair below is measured by the standard's validator at every release; the ratios are WCAG 2.1 contrast, and each meets its threshold in both themes.</p>
   <div class="gradient" role="img" aria-label="The brand sweep, blue to violet to red"></div>
   <p>The sweep is a surface for nothing that must be read: hairlines, a glow, the hero's bloom.</p>
-  <table>
+  <div class="table-scroll"><table class="role-table">
     <thead><tr><th>Role</th><th>Light</th><th>Dark</th><th>Usage</th></tr></thead>
     <tbody>
 {{ color_rows }}
     </tbody>
-  </table>
+  </table></div>
   <h3>Measured pairs</h3>
-  <table>
+  <div class="table-scroll"><table>
     <thead><tr><th>Pair</th><th>Threshold</th><th>Light</th><th>Dark</th></tr></thead>
     <tbody>
 {{ pair_rows }}
     </tbody>
-  </table>
+  </table></div>
 
   <h2 id="type">Typefaces</h2>
   <p><strong>{{ font.family.text }}</strong> for text, at the weights {{ text_weights }}; <strong>{{ font.family.code }}</strong> for code and labels, at {{ code_weights }}. Both are served from each host's own origin, as Latin subsets under the SIL Open Font License, with the fallback stacks below. No host loads a font from a third party.</p>
   <p class="type-specimen">Modern tools for building energy simulation</p>
   <p class="type-specimen code">load_idf("office.idf")</p>
-  <table>
+  <div class="table-scroll"><table>
     <thead><tr><th>Role</th><th>Family</th><th>Fallback stack</th></tr></thead>
     <tbody>
       <tr><td>Text</td><td>{{ font.family.text }}</td><td><code>{{ stack.text }}</code></td></tr>
       <tr><td>Code and labels</td><td>{{ font.family.code }}</td><td><code>{{ stack.code }}</code></td></tr>
     </tbody>
-  </table>
+  </table></div>
   <p>The files are in the <code>css.tar.gz</code> archive of the <a href="{{ release_url }}">{{ tag }} release</a>, under <code>fonts/</code>, with their licences.</p>
 
   <h2 id="family">The family</h2>

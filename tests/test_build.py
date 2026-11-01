@@ -113,6 +113,7 @@ def test_stytch_derivation(dist: Path, root: Path) -> None:
         assert keys(styles) <= keys(schema), name
         assert styles["buttons"]["primary"]["backgroundColor"] in ("#3b82f6", "#2563eb")
         assert "logo" not in styles, "the page's header carries the lockup, so the widget shows no second one"
+        assert styles["container"]["width"] == "100%", "a fixed width overflows a phone; the page limits the width"
     coverage = (dist / "stytch" / "schema-coverage.md").read_text(encoding="utf-8")
     assert "## Not expressible" in coverage and "font.family.code" in coverage
 
@@ -188,6 +189,7 @@ def test_hosts_derivation(dist: Path, root: Path) -> None:
             narrow = sheet.split(f"@media screen and (max-width: {build_module.MATERIAL_DRAWER_BREAKPOINT})")[1]
             assert '.md-nav__title[for="__drawer"] .md-logo img {' in narrow, touchpoint.id
             assert ".md-header__topic:first-child::before {" in narrow, touchpoint.id
+            assert "translateY" not in narrow, "a fractional transform renders the mark off its pixel grid"
 
 
 @needs_rsvg
@@ -208,6 +210,7 @@ def test_brand_page_names_the_tag_and_every_exception(dist: Path, root: Path) ->
             assert exception.part in page
     assert "releases/download/identity-2026.1/mark-on-dark.svg" in page
     assert "releases/download/identity-2026.1/tile.png" in page
+    assert page.count('<div class="table-scroll"><table') == page.count("<table"), "a table scrolls in its own box"
     assert (dist / "brand-page" / "assets" / "incorrect-rotated.svg").exists()
 
 
