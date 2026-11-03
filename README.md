@@ -14,7 +14,7 @@ repository and nowhere else.
 | `fonts/` | Inter and JetBrains Mono as Latin woff2 subsets with their licences, and TTF copies the build sets text with |
 | `touchpoints.toml` | the roster: the family links, the ownership line, every host, every root README and every published package's README, their exceptions. Never a level |
 | `templates/` | the social images, the head fragment, the family links, the footer, the brand page |
-| `build.py` | source to `dist/`: `css`, `material`, `envelop`, `stytch`, `hero`, `readme`, `repo-preview`, `hosts`, `brand-page`, and the local contact sheet `review/` |
+| `build.py` | source to `dist/`: `css`, `material`, `envelop`, `stytch`, `hero`, `readme`, `repo-preview`, `avatar`, `hosts`, `brand-page`, and the local contact sheet `review/` |
 | `tools/` | `validate_identity.py` (the gate), `check_touchpoint.py` (the six assertions a touchpoint's CI runs), `sweep_touchpoints.py` (who is behind) |
 | `design/` | the direction comparison and the mark exploration, as PDF |
 
