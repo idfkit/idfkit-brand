@@ -6,10 +6,10 @@
 <title>idfkit brand</title>
 <meta name="description" content="The idfkit visual identity: the mark, its rules, the colours in both themes, the typefaces, and the exceptions, at {{ tag }}.">
 <!--
-  The brand page (FR-034, research R16). build.py renders it from the standard at the tag; the
-  marketing site vendors it unchanged and serves it at /brand/. It expects the css derivation
-  beside it at css/ and its own images at brand-page/assets/, which is where the identity-adopt
-  skill places them on idfkit.com. Every value here is a token name or a build variable.
+  The brand page (FR-034, research R16). build.py renders it from the standard at the tag as a
+  site of its own, with the css derivation at css/, its images at assets/ and the icon set at the
+  root, and identity.yml deploys that site to brand.idfkit.com. Every value here is a token name
+  or a build variable.
 -->
 <link rel="stylesheet" href="css/tokens.css">
 <link rel="stylesheet" href="css/fonts.css">
@@ -58,7 +58,6 @@
   .type-specimen.code { font-family: var(--idfkit-font-code); font-size: 1.25rem; }
   .idfkit-family { display: flex; gap: var(--idfkit-space-2); flex-wrap: wrap; font-size: 0.9rem; }
   .idfkit-family a { color: var(--idfkit-color-ink-muted); text-decoration: none; }
-  .idfkit-family a[aria-current="page"] { color: var(--idfkit-color-accent); font-weight: var(--idfkit-font-weight-semibold); }
   footer.page { margin-top: var(--idfkit-space-8); padding-top: var(--idfkit-space-3); border-top: 1px solid var(--idfkit-color-border); display: flex; flex-wrap: wrap; gap: var(--idfkit-space-2); justify-content: space-between; color: var(--idfkit-color-ink-muted); font-size: 0.9rem; }
   .gradient { height: 3rem; border-radius: var(--idfkit-radius-md); background: linear-gradient(135deg, var(--idfkit-color-gradient-start) 0%, var(--idfkit-color-gradient-mid) 40%, var(--idfkit-color-gradient-end) 100%); }
   .ratio-pass { color: var(--idfkit-color-status-success); font-family: var(--idfkit-font-code); }
@@ -67,13 +66,13 @@
 <body>
 <main>
   <header class="page">
-    <a href="/" aria-label="idfkit">{{ lockup.inline }}</a>
+    <a href="https://idfkit.com/" aria-label="idfkit">{{ lockup.inline }}</a>
     {{ family_links }}
   </header>
 
   <p class="eyebrow">Brand · {{ tag }}</p>
   <h1>The idfkit identity</h1>
-  <p class="lede">One mark, one accent, one pair of typefaces, on every idfkit host and repository. This page describes the standard at <code>{{ tag }}</code>, the version the site you are reading renders; every file here is generated from that tag and can be downloaded from its release.</p>
+  <p class="lede">One mark, one accent, one pair of typefaces, on every idfkit host and repository. This page describes the standard at <code>{{ tag }}</code>, its latest release; every file here is generated from that tag and can be downloaded from its release.</p>
 
   <h2 id="mark">The mark</h2>
   <p>A block with one piece lifted out of its slot: a kit of parts that fit together, as an EnergyPlus model is objects assembled into a building. It is drawn on a 48-unit grid in one colour and is never drawn in two colours, never outlined, never rotated, and never given a gradient. Inline, it takes the colour of the surrounding text.</p>

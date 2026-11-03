@@ -7,6 +7,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- The brand page moves from `idfkit.com/brand/` to its own site, `brand.idfkit.com`. `dist/brand-page/`
+  is now that whole site: the page, its images under `assets/`, the `css` derivation and its own icon
+  set and social image at the root. `identity.yml` deploys it to GitHub Pages from each tag, so the page
+  always describes the latest release instead of the level idfkit.com last adopted.
+- **Breaking for idfkit.com:** the roster no longer lists `brand/brand-page/` among its vendored paths,
+  and the check no longer accepts a `brand-page` directory there. Adopting this tag removes
+  `brand/brand-page/` and `brand/index.html` from the site.
+
 ### Added
 
 - `dist/avatar/`, the profile pictures of the two GitHub accounts as 1024 px PNGs with their SVG
