@@ -7,6 +7,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- `dist/avatar/`, the profile pictures of the two GitHub accounts as 1024 px PNGs with their SVG
+  sources: `idfkit.png`, the tile at full bleed for the organisation, and `idfkit-bot.png`, the mark in
+  the accent ink on the accent for the organisation's GitHub App. The owner uploads both by hand.
+
 ## [identity-2026.4] - 2026-11-01
 
 The brand page and the sign-in widget fit a phone, and the Material header centres its lockup without a
@@ -80,7 +86,8 @@ grounds and then the hosts rendering them, and accepted them after the correctio
 - Exceptions recorded in the roster: ten parts the hosted sign-in widget cannot express, the stock API
   pages of the MCP deployment, and the application's dark accent on its own raised surface.
 
-[Unreleased]: https://github.com/idfkit/idfkit-brand/compare/identity-2026.3...HEAD
+[Unreleased]: https://github.com/idfkit/idfkit-brand/compare/identity-2026.4...HEAD
+[identity-2026.4]: https://github.com/idfkit/idfkit-brand/compare/identity-2026.3...identity-2026.4
 [identity-2026.3]: https://github.com/idfkit/idfkit-brand/compare/identity-2026.2...identity-2026.3
 [identity-2026.2]: https://github.com/idfkit/idfkit-brand/compare/identity-2026.1...identity-2026.2
 [identity-2026.1]: https://github.com/idfkit/idfkit-brand/releases/tag/identity-2026.1

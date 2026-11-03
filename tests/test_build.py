@@ -9,7 +9,7 @@ import subprocess
 from pathlib import Path
 
 import pytest
-from models import load_roster
+from models import load_roster, load_tokens
 
 import build as build_module
 
@@ -147,6 +147,28 @@ def test_readme_and_repo_preview_derivations(dist: Path, root: Path) -> None:
     for path in (dist / "repo-preview").glob("*.png"):
         assert png_size(path.read_bytes()) == (1280, 640)
         assert path.stat().st_size < 1_000_000
+
+
+@needs_rsvg
+def test_avatar_derivation(dist: Path, root: Path) -> None:
+    from rasters import png_size
+
+    tokens = load_tokens(root / "identity.tokens.json")
+    assert sorted(p.name for p in (dist / "avatar").iterdir()) == [
+        "idfkit-bot.png",
+        "idfkit-bot.svg",
+        "idfkit.png",
+        "idfkit.svg",
+    ]
+    for avatar in build_module.AVATARS:
+        svg = (dist / "avatar" / f"{avatar.account}.svg").read_text(encoding="utf-8")
+        # Full bleed: GitHub draws its own corners, so a rounded tile would show a second, smaller one.
+        assert 'rx="0"' in svg
+        assert f'fill="{tokens.resolve(avatar.ground, "dark")}"' in svg
+        assert f'fill="{tokens.resolve(avatar.ink, "dark")}"' in svg
+        png = dist / "avatar" / f"{avatar.account}.png"
+        assert png_size(png.read_bytes()) == (build_module.AVATAR_SIZE, build_module.AVATAR_SIZE)
+        assert png.stat().st_size < 1_000_000
 
 
 @needs_rsvg

@@ -60,6 +60,7 @@ MECHANISM_DIRS: tuple[str, ...] = (
     "hero",
     "readme",
     "repo-preview",
+    "avatar",
     "hosts",
     "brand-page",
 )
@@ -814,6 +815,37 @@ def build_repo_previews(build: Build) -> None:
             raise BuildError(f"{png} is not under 1 MB, which the social preview requires")
 
 
+#: GitHub masks an avatar itself, so the tile goes full bleed, at twice the 460 px it asks for.
+AVATAR_SIZE = 1024
+
+
+@dataclass(frozen=True, slots=True)
+class Avatar:
+    """One GitHub account's profile picture: the mark in one role on the ground of another."""
+
+    account: str
+    ground: str
+    ink: str
+
+
+#: Both in the dark theme's pairs, as every fixed image is. The organisation is the tile; the bot,
+#: which opens pull requests, is the tile inverted into the accent, the colour of a control.
+AVATARS: tuple[Avatar, ...] = (
+    Avatar("idfkit", "color.role.ground", "color.role.ink"),
+    Avatar("idfkit-bot", "color.role.accent", "color.role.accent-ink"),
+)
+
+
+def build_avatars(build: Build) -> None:
+    out = build.out / "avatar"
+    for avatar in AVATARS:
+        ground = build.tokens.resolve(avatar.ground, "dark")
+        ink = build.tokens.resolve(avatar.ink, "dark")
+        svg = out / f"{avatar.account}.svg"
+        write(svg, mark.svg_tile(AVATAR_SIZE, radius=0, ground=ground, ink=ink))
+        rsvg_convert(svg, out / f"{avatar.account}.png", AVATAR_SIZE, AVATAR_SIZE)
+
+
 def host_lockup(build: Build, touchpoint: Touchpoint) -> tuple[str, float, float]:
     """This host's lockup in currentColor, its name outlined, so every host draws the same geometry."""
     name = touchpoint.property_name
@@ -1214,6 +1246,7 @@ CONSUMERS: dict[str, str] = {
     "hero": "idfkit.com",
     "readme": "the brand page's downloads; a README addresses marks/ at the tag",
     "repo-preview": "the owner, by hand, in each repository's Social preview setting",
+    "avatar": "the owner, by hand, in the organisation's profile and the idfkit-bot App's display information",
     "hosts": "each host, its own directory",
     "brand-page": "idfkit.com at /brand/",
 }
@@ -1401,6 +1434,7 @@ def run(build: Build, with_archive: bool = False) -> None:
     build_hero(build)
     build_readme(build)
     build_repo_previews(build)
+    build_avatars(build)
     build_hosts(build)
     build_brand_page(build, measure_pairs(build.tokens))
     build_review(build)
