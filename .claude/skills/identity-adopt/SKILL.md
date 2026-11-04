@@ -49,15 +49,14 @@ and deleting what the tag no longer produces. The vendored location is the entry
 path: where that path is a container (`docs/identity/`, `src/identity/`, `identity/`), each
 mechanism lands in a subdirectory of its own name (`docs/identity/material/`,
 `docs/identity/hosts/developers.idfkit.com/`); where the vendored paths name the mechanisms
-themselves (`brand/css/`, `brand/hero/`, `brand/hosts/`, `brand/brand-page/` on the marketing
-site), each lands in its own path.
+themselves (`brand/css/`, `brand/hero/`, `brand/hosts/` on the marketing site), each lands in its
+own path.
 
 Then apply the entry's `notes`:
 
 - **idfkit.com** serves `brand/hosts/idfkit.com/` at `/brand/hosts/idfkit.com/`: rewrite the
   paths in the copied `head.html` to that prefix (the check normalises the prefix when comparing).
-  Copy `brand/brand-page/index.html` to `brand/index.html` so that `/brand/` resolves; the two
-  stay identical.
+  The brand page is not vendored: `identity.yml` deploys it to brand.idfkit.com at the tag.
 - **The Material sites** keep the derivation under `docs/identity/` so the site builds from `docs/`
   and `mkdocs.yml` alone; exclude the directory from formatting hooks as the other vendored trees
   are.

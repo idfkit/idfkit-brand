@@ -755,10 +755,9 @@ def place(
     return Placed(f"translate({x:.2f} {y:.2f}) scale({scale:.4f})", markup)
 
 
-def og_svg(build: Build, touchpoint: Touchpoint) -> str:
-    markup, width, height = lockup_for(build, touchpoint, touchpoint.property_name or None)
+def og_svg(build: Build, property_name: str, host_name: str) -> str:
+    markup, width, height = lockup_for(build, None, property_name or None)
     placed = place(markup, width, height, 1200, 630, 760)
-    host_name = touchpoint.host_name or ""
     run = build.label_font.run(host_name)
     size = 22.0
     host_svg = run.svg((1200 - run.width(size)) / 2, 560, size, build.tokens.resolve("color.role.ink-label", "dark"))
@@ -766,7 +765,7 @@ def og_svg(build: Build, touchpoint: Touchpoint) -> str:
         build,
         "og.svg",
         {
-            "property": html.escape(touchpoint.property_name or "idfkit"),
+            "property": html.escape(property_name or "idfkit"),
             "lockup.transform": placed.transform,
             "lockup.svg": placed.markup,
             "host.svg": host_svg,
@@ -985,45 +984,49 @@ def lockup_css(build: Build, touchpoint: Touchpoint, width: float, height: float
     return "\n".join(lines)
 
 
-def build_hosts(build: Build) -> None:
+def write_icons(build: Build, out: Path, host: str, host_name: str, property_name: str) -> dict[str, str]:
+    """The favicon set, the touch and manifest icons, the social image and the manifest of one site.
+
+    Returns the variables its head.html is rendered with, the root of the site as the prefix.
+    """
     marks = build.root / "marks"
     small_tile = mark.svg_small_tile(
         build.tokens.resolve("color.primitive.navy-950", "dark"), build.tokens.resolve("color.role.ink", "dark")
     )
     full_bleed = mark.svg_tile(mark.TILE_SIZE, 0)
+    out.mkdir(parents=True, exist_ok=True)
+    copy(marks / "tile.svg", out / "favicon.svg")
+    frames: list[bytes] = []
+    for size, source in (
+        (16, small_tile),
+        (32, small_tile),
+        (48, (marks / "tile.svg").read_text(encoding="utf-8")),
+    ):
+        png = out / f"favicon-{size}.png"
+        rasterize_text(source, png, size, size)
+        frames.append(png.read_bytes())
+        png.unlink()
+    (out / "favicon.ico").write_bytes(pack_ico(frames))
+    rasterize_text(full_bleed, out / "apple-touch-icon.png", 180, 180)
+    rasterize_text(full_bleed, out / "icon-192.png", 192, 192)
+    rasterize_text(full_bleed, out / "icon-512.png", 512, 512)
+    rasterize_text(og_svg(build, property_name, host_name), out / "og.png", 1200, 630)
+    variables = {"tag": build.tag, "host": host, "prefix": "/", "property": html.escape(property_name)}
+    manifest = (
+        render_template(build, "manifest.webmanifest", variables)
+        .replace("idfkit ", "idfkit ")
+        .replace('"name": "idfkit "', '"name": "idfkit"')
+    )
+    write(out / "manifest.webmanifest", manifest)
+    return variables
+
+
+def build_hosts(build: Build) -> None:
     for touchpoint in build.roster.hosts():
         host = touchpoint.host_name or ""
         out = build.out / "hosts" / host
-        out.mkdir(parents=True, exist_ok=True)
-        copy(marks / "tile.svg", out / "favicon.svg")
-        frames: list[bytes] = []
-        for size, source in (
-            (16, small_tile),
-            (32, small_tile),
-            (48, (marks / "tile.svg").read_text(encoding="utf-8")),
-        ):
-            png = out / f"favicon-{size}.png"
-            rasterize_text(source, png, size, size)
-            frames.append(png.read_bytes())
-            png.unlink()
-        (out / "favicon.ico").write_bytes(pack_ico(frames))
-        rasterize_text(full_bleed, out / "apple-touch-icon.png", 180, 180)
-        rasterize_text(full_bleed, out / "icon-192.png", 192, 192)
-        rasterize_text(full_bleed, out / "icon-512.png", 512, 512)
-        rasterize_text(og_svg(build, touchpoint), out / "og.png", 1200, 630)
-        variables = {
-            "tag": build.tag,
-            "host": touchpoint.host or "",
-            "prefix": "/",
-            "property": html.escape(touchpoint.property_name or ""),
-        }
+        variables = write_icons(build, out, touchpoint.host or "", host, touchpoint.property_name or "")
         write(out / "head.html", render_template(build, "head.html", variables))
-        manifest = (
-            render_template(build, "manifest.webmanifest", variables)
-            .replace("idfkit ", "idfkit ")
-            .replace('"name": "idfkit "', '"name": "idfkit"')
-        )
-        write(out / "manifest.webmanifest", manifest)
         lockup_svg, lockup_width, lockup_height = host_lockup(build, touchpoint)
         write(out / "lockup.svg", lockup_svg)
         write(out / "lockup.css", lockup_css(build, touchpoint, lockup_width, lockup_height))
@@ -1069,7 +1072,12 @@ def incorrect_uses(build: Build) -> dict[str, str]:
     }
 
 
+#: The brand page's own address. identity.yml deploys dist/brand-page/ there at every tag.
+BRAND_HOST = "https://brand.idfkit.com"
+
+
 def build_brand_page(build: Build, pairs: Iterable[PairResult]) -> None:
+    """A site of its own: the page, its images, the css derivation and the icon set at its root."""
     out = build.out / "brand-page"
     assets = out / "assets"
     marks = build.root / "marks"
@@ -1091,7 +1099,7 @@ def build_brand_page(build: Build, pairs: Iterable[PairResult]) -> None:
                     divider=build.tokens.resolve("color.role.ink-label", "dark"),
                 ),
             )
-    prefix = "brand-page/assets/"
+    prefix = "assets/"
     loose = set(README_IMAGES)
 
     def download(name: str) -> str:
@@ -1202,17 +1210,12 @@ def build_brand_page(build: Build, pairs: Iterable[PairResult]) -> None:
         else "  <p>None recorded at this version.</p>"
     )
     weights = [t for t in build.tokens if t.name.startswith("font.weight.")]
-    links = "\n".join(
-        f'    <a href="{link.href}"{' aria-current="page"' if link.order == 1 else ""}>{html.escape(link.label)}</a>'
-        for link in build.roster.family_links
-    )
+    # The brand site is none of the family's hosts, so no link is the current page.
+    links = "\n".join(f'    <a href="{link.href}">{html.escape(link.label)}</a>' for link in build.roster.family_links)
     family_links = f'<nav aria-label="idfkit" class="idfkit-family">\n{links}\n  </nav>'
     lockup_inline = mark.svg_lockup("currentColor", build.word).strip().replace("<svg ", '<svg class="idfkit-mark" ', 1)
-    head = render_template(
-        build,
-        "head.html",
-        {"tag": build.tag, "host": "https://idfkit.com", "prefix": "/brand/hosts/idfkit.com/", "property": ""},
-    )
+    head = render_template(build, "head.html", write_icons(build, out, BRAND_HOST, BRAND_HOST.split("//", 1)[1], ""))
+    shutil.copytree(build.out / "css", out / "css")
     variables = {
         "tag": build.tag,
         "date": build.date,
@@ -1248,7 +1251,7 @@ CONSUMERS: dict[str, str] = {
     "repo-preview": "the owner, by hand, in each repository's Social preview setting",
     "avatar": "the owner, by hand, in the organisation's profile and the idfkit-bot App's display information",
     "hosts": "each host, its own directory",
-    "brand-page": "idfkit.com at /brand/",
+    "brand-page": "brand.idfkit.com, deployed from this repository by identity.yml at every tag",
 }
 
 

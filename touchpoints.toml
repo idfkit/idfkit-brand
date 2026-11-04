@@ -62,10 +62,10 @@ host = "https://idfkit.com"
 property_name = ""
 mechanisms = ["css", "hero"]
 declared_at = { path = "brand/identity.json", locator = "/level", form = "json-pointer" }
-vendored = ["brand/css/", "brand/hero/", "brand/hosts/", "brand/brand-page/"]
+vendored = ["brand/css/", "brand/hero/", "brand/hosts/"]
 identity_bearing = ["css/**/*.css", "js/**/*.js", "index.html", "docs/**/*.html"]
 lockup_at = ["index.html"]
-notes = "The site serves brand/hosts/idfkit.com/ at /brand/hosts/idfkit.com/, so head.html's paths are rewritten to that prefix at adoption. brand/brand-page/index.html is also copied to brand/index.html so that /brand/ resolves; adoption keeps the two identical."
+notes = "The site serves brand/hosts/idfkit.com/ at /brand/hosts/idfkit.com/, so head.html's paths are rewritten to that prefix at adoption. The brand page is not vendored here: identity.yml deploys it to brand.idfkit.com, and the footer links there."
 
 [[touchpoint]]
 id = "developers"

@@ -77,7 +77,7 @@ TEXT_SUFFIXES = frozenset({
     ".svg",
 })
 #: Container directories under a vendored path are named for what they hold.
-VENDORED_DIRS: tuple[str, ...] = (*MECHANISMS, "hosts", "brand-page")
+VENDORED_DIRS: tuple[str, ...] = (*MECHANISMS, "hosts")
 FAMILY_SEPARATOR = " · "
 
 

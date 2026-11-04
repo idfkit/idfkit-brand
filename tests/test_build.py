@@ -237,6 +237,34 @@ def test_brand_page_names_the_tag_and_every_exception(dist: Path, root: Path) ->
 
 
 @needs_rsvg
+def test_brand_page_is_a_site_of_its_own(dist: Path) -> None:
+    site = dist / "brand-page"
+    for name in (
+        "index.html",
+        "favicon.svg",
+        "favicon.ico",
+        "apple-touch-icon.png",
+        "icon-192.png",
+        "icon-512.png",
+        "og.png",
+        "manifest.webmanifest",
+        "css/tokens.css",
+        "css/fonts.css",
+        "assets/mark.svg",
+    ):
+        assert (site / name).exists(), name
+    page = (site / "index.html").read_text(encoding="utf-8")
+    # Every path the page loads resolves inside the site; the lockup leads back to the marketing site.
+    for ref in re.findall(r'(?:src|href)="([^"#]+)"', page):
+        if not ref.startswith(("http://", "https://")):
+            assert (site / ref.lstrip("/")).exists(), ref
+    assert f'content="{build_module.BRAND_HOST}/og.png"' in page
+    assert '<a href="https://idfkit.com/" aria-label="idfkit">' in page
+    assert "/brand/" not in page
+    assert 'aria-current="page"' not in page
+
+
+@needs_rsvg
 def test_review_sheet_shows_every_image(dist: Path) -> None:
     sheet = (dist / "review" / "index.html").read_text(encoding="utf-8")
     images = [
