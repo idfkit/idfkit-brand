@@ -1,1 +1,1 @@
-{ "name": "idfkit-slides", "version": "1.0.0", "private": true, "description": "PowerPoint design system derived from idfkit-brand", "dependencies": { "pptxgenjs": "3.12.0" } }
+{ "name": "idfkit-slides", "version": "1.0.0", "private": true, "description": "PowerPoint design system derived from idfkit-brand", "dependencies": { "jszip": "3.10.2", "pptxgenjs": "3.12.0" } }

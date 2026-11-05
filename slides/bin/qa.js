@@ -53,6 +53,9 @@ function userFontDir() {
 function render(deck, outDir) {
   const binary = soffice();
   if (!binary) return fail("LibreOffice (soffice) was not found; install it to render the deck");
+  // A PDF left by an earlier run would otherwise pass for this one when LibreOffice writes nothing.
+  const pdf = path.join(outDir, `${path.basename(deck, path.extname(deck))}.pdf`);
+  fs.rmSync(pdf, { force: true });
   const fontDir = userFontDir();
   const profile = fs.mkdtempSync(path.join(os.tmpdir(), "idfkit-slides-lo-"));
   fs.mkdirSync(fontDir, { recursive: true });
@@ -63,7 +66,6 @@ function render(deck, outDir) {
     fs.rmSync(fontDir, { recursive: true, force: true });
     fs.rmSync(profile, { recursive: true, force: true });
   }
-  const pdf = path.join(outDir, `${path.basename(deck, path.extname(deck))}.pdf`);
   if (!fs.existsSync(pdf)) return fail("LibreOffice wrote no PDF");
   console.log(`qa: rendered ${pdf}`);
   return pdf;
@@ -72,8 +74,15 @@ function render(deck, outDir) {
 function checkFonts(pdf) {
   const result = spawnSync("pdffonts", [pdf], { encoding: "utf8" });
   if (result.status !== 0) return console.log("qa: pdffonts not found; embedded fonts not checked");
+  // Columns are fixed-width under a row of dashes; the fourth is "emb". A type such as "Type 1C" holds a space.
+  const [, dashes = "", ...rows] = result.stdout.split("\n");
+  const columns = [...dashes.matchAll(/-+/g)].map((match) => [match.index, match.index + match[0].length]);
+  const cell = (row, index) => (columns[index] ? row.slice(...columns[index]).trim() : "");
+  const embedded = rows.filter((row) => cell(row, 3) === "yes").map((row) => cell(row, 0));
   for (const family of ["Inter", "JetBrainsMono"]) {
-    if (!result.stdout.includes(family)) fail(`${family} is not embedded in the PDF; the renderer substituted another font`);
+    if (!embedded.some((name) => name.replace(/^[A-Z]{6}\+/, "").startsWith(family))) {
+      fail(`${family} is not embedded in the PDF; the renderer substituted another font or left it out`);
+    }
   }
   console.log("qa: fonts checked");
 }
@@ -93,4 +102,4 @@ async function main() {
   if (!process.exitCode) console.log("qa: passed; open the PDF and inspect every slide");
 }
 
-main();
+main().catch((error) => fail(error.message));

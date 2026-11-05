@@ -45,9 +45,10 @@ async function applyTheme(fileName, theme) {
   const scheme = colourScheme(theme);
   for (const name of parts) {
     const xml = await zip.file(name).async("string");
+    // Replacer functions, so that a "$" in a theme name is written as itself, not read as a pattern.
     const updated = xml
-      .replace(/<a:clrScheme\b[^>]*>[\s\S]*?<\/a:clrScheme>/, scheme)
-      .replace(/(<a:theme\b[^>]*\bname=")[^"]*(")/, `$1${escapeXml(theme.name)}$2`);
+      .replace(/<a:clrScheme\b[^>]*>[\s\S]*?<\/a:clrScheme>/, () => scheme)
+      .replace(/(<a:theme\b[^>]*\bname=")[^"]*(")/, (_, open, close) => `${open}${escapeXml(theme.name)}${close}`);
     zip.file(name, updated);
   }
   fs.writeFileSync(fileName, await zip.generateAsync({ type: "nodebuffer", compression: "DEFLATE" }));

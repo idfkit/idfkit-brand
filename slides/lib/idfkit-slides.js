@@ -12,6 +12,11 @@ const IDENTITY_TAG = fs.readFileSync(path.join(ROOT, "tokens", "IDENTITY_TAG"), 
 const raw = JSON.parse(fs.readFileSync(path.join(ROOT, "tokens", "identity.tokens.json"), "utf8"));
 
 const px = (value) => parseFloat(value) / 96;
+// Height over width of a PNG, from its IHDR chunk, so an image keeps the proportions build.py gave it.
+const aspect = (file) => {
+  const header = fs.readFileSync(file).subarray(16, 24);
+  return header.readUInt32BE(4) / header.readUInt32BE(0);
+};
 const hex = (name) => raw.color.primitive[name].$value.light.replace("#", "").toUpperCase();
 const SPACE = Object.fromEntries(
   Object.entries(raw.space).filter(([k]) => !k.startsWith("$")).map(([k, v]) => [k, px(v.$value)]),
@@ -78,7 +83,7 @@ function createDeck({ title, author, subject, footer }) {
     background: { color: C.text2 },
     objects: [
       { image: { path: path.join(ASSETS, "bloom.png"), x: 6.333, y: 0, w: 7, h: 7.5 } },
-      { image: { path: path.join(ASSETS, "lockup-on-dark.png"), x: M, y: M, w: 2.3, h: 2.3 * (512 / 2145) } },
+      { image: { path: path.join(ASSETS, "lockup-on-dark.png"), x: M, y: M, w: 2.3, h: 2.3 * aspect(path.join(ASSETS, "lockup-on-dark.png")) } },
       placeholder("eyebrow", "body", { x: M, y: 2.55, w: 9, h: 0.35, fontFace: FONT.code, fontSize: TYPE.eyebrow, color: C.accent2, valign: "middle" }),
       placeholder("title", "title", { x: M, y: 2.95, w: 10, h: 1.1, fontSize: TYPE.display, bold: true, color: C.background1, valign: "top" }),
       placeholder("subtitle", "body", { x: M, y: 4.1, w: 8.5, h: 0.95, fontSize: TYPE.heading, color: C.accent6, valign: "top" }),
@@ -176,7 +181,7 @@ function card(pres, slide, { x, y, w, h, heading, body, badge, bodySize, name })
   }
 }
 
-// lines: strings, or arrays of {text, tone} runs. A line starting with "#" reads as a comment.
+// lines: one string per line. A line starting with "#" reads as a comment.
 function code(pres, slide, { x, y, w, h, lines, label, fontSize }) {
   const C = pres.SchemeColor;
   const pad = SPACE["3"];

@@ -30,7 +30,7 @@ The contracts that fix each of these are in the planning repository, under
    regenerates `marks/`.
 2. Run `make check`: the quality tools, then `tools/validate_identity.py`, which parses the file,
    resolves every alias, measures every text-on-ground pair in both themes against its threshold,
-   scans the templates for literals, checks the roster, and compares the committed masters with
+   scans the templates and the slides scripts for literals, checks the roster, and compares the committed masters with
    `mark.py`'s output. A pair under its threshold is a failure, not a note.
 3. Run `make build` and open `dist/review/index.html`, the contact sheet of every image produced,
    on the light ground and the dark ground. The owner reviews it before any tag that changes a

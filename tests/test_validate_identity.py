@@ -93,6 +93,21 @@ def test_a_template_with_a_literal_fails(standard_copy: Path, fixtures: Path) ->
     )
 
 
+def test_a_slides_script_with_a_literal_fails(standard_copy: Path, root: Path) -> None:
+    shutil.copytree(root / "slides", standard_copy / "slides", ignore=shutil.ignore_patterns("node_modules"))
+    assert vi.check_slides(standard_copy) == []
+    library = standard_copy / "slides" / "lib" / "idfkit-slides.js"
+    library.write_text(library.read_text(encoding="utf-8") + 'const stray = { color: "2563EB" };\n', encoding="utf-8")
+    example = standard_copy / "slides" / "example" / "build_example.js"
+    example.write_text(example.read_text(encoding="utf-8") + 'const face = { fontFace: "Arial" };\n', encoding="utf-8")
+    findings = vi.check_slides(standard_copy)
+    assert [f.where.split(":")[0] for f in findings] == [
+        "slides/lib/idfkit-slides.js",
+        "slides/example/build_example.js",
+    ]
+    assert '"2563EB"' in findings[0].message and "font literal" in findings[1].message
+
+
 def test_a_roster_with_eight_family_links_fails(standard_copy: Path, fixtures: Path) -> None:
     shutil.copy(fixtures / "standard" / "eight-links.toml", standard_copy / "touchpoints.toml")
     report = vi.validate(standard_copy)

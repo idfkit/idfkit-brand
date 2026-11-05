@@ -176,10 +176,17 @@ def test_slides_derivation(dist: Path, root: Path) -> None:
     from rasters import png_size
 
     slides = dist / "slides"
-    # The library and its documentation come from slides/ unchanged; nothing installed or built there is copied.
-    for rel in ("SKILL.md", "package.json", "package-lock.json", "lib/idfkit-slides.js", "lib/theme.js", "bin/qa.js"):
+    # The library and its documentation come from slides/ unchanged, and nothing else there is copied.
+    sources = [*build_module.SLIDES_FILES] + [
+        f"{directory}/{p.name}"
+        for directory in build_module.SLIDES_SCRIPT_DIRS
+        for p in (root / "slides" / directory).glob("*.js")
+    ]
+    assert "lib/idfkit-slides.js" in sources and "bin/qa.js" in sources and "example/build_example.js" in sources
+    for rel in sources:
         assert (slides / rel).read_bytes() == (root / "slides" / rel).read_bytes(), rel
-    assert not any("node_modules" in p.parts or p.suffix == ".pptx" for p in slides.rglob("*"))
+    copied = {p.relative_to(slides).as_posix() for p in slides.rglob("*") if p.is_file()}
+    assert {rel for rel in copied if rel.split("/")[0] not in ("tokens", "assets", "fonts")} == set(sources)
     # The tokens are the tag's file, and the tag is stamped beside them for the deck's theme name.
     assert (slides / "tokens" / "identity.tokens.json").read_bytes() == (root / "identity.tokens.json").read_bytes()
     assert (slides / "tokens" / "IDENTITY_TAG").read_text(encoding="utf-8") == "identity-2026.1\n"
@@ -197,8 +204,8 @@ def test_slides_derivation(dist: Path, root: Path) -> None:
     # The bloom is the gradient's three stops, read from the tokens.
     tokens = load_tokens(root / "identity.tokens.json")
     bloom = build_module.slides_bloom_svg(build_module.load_build(root, dist, build_module.UNRELEASED))
-    for stop, *_ in build_module.SLIDES_BLOOM:
-        assert f'stop-color="{tokens.resolve(f"color.primitive.{stop}", "light")}"' in bloom
+    for glow in build_module.SLIDES_BLOOM:
+        assert f'stop-color="{tokens.resolve(f"color.primitive.{glow.stop}", "light")}"' in bloom
 
 
 @needs_rsvg

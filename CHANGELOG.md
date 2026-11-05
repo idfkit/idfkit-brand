@@ -15,6 +15,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   reference deck, and the tag's tokens, marks, bloom and TTF fonts. Its source is `slides/`; each
   release attaches it as `slides.tar.gz`. `make slides-qa` builds and checks the reference deck, and
   `make slides-install` installs the working tree's build as the `idfkit-slides` skill.
+- `tools/validate_identity.py` scans the slides library's scripts for colour and font literals, as it
+  scans the templates, since the library reads every value from the token file.
 
 ## [identity-2026.5] - 2026-11-04
 

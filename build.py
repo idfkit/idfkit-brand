@@ -5,8 +5,8 @@
     python build.py --out dist --archive       also write one .tar.gz per mechanism directory
     python build.py --compare A B              compare two builds: text byte for byte, rasters by pixel
 
-Inputs are the token file, the marks, the fonts, the roster and the templates, and nothing else: a
-derivation never reads a touchpoint (data-model, Derivation). Every SVG, CSS, JSON, JS and HTML file
+Inputs are the token file, the marks, the fonts, the roster, the templates and the slides library
+under slides/, and nothing else: a derivation never reads a touchpoint (data-model, Derivation). Every SVG, CSS, JSON, JS and HTML file
 is a pure function of those inputs, so two builds of one tag are byte-identical; rasters go through
 `rsvg-convert` and may differ in bytes by host, which is why `--compare` and the check decode them.
 
@@ -338,10 +338,13 @@ def ownership_html(build: Build) -> str:
     return f'<p class="idfkit-ownership">{html.escape(build.roster.ownership)}</p>\n'
 
 
-def copy_fonts(build: Build, target: Path) -> None:
-    for path in sorted((build.root / "fonts").iterdir()):
-        if path.suffix == ".woff2" or path.name.startswith("LICENSE-"):
-            copy(path, target / path.name)
+def copy_fonts(build: Build, target: Path, fmt: str = "woff2") -> None:
+    """The fonts in one format with their licences: the woff2 subsets for the web, `ttf` for decks."""
+    fonts = build.root / "fonts"
+    for path in sorted((fonts if fmt == "woff2" else fonts / "build").glob(f"*.{fmt}")):
+        copy(path, target / path.name)
+    for path in sorted(fonts.glob("LICENSE-*")):
+        copy(path, target / path.name)
 
 
 def build_css(build: Build) -> None:
@@ -848,25 +851,42 @@ def build_avatars(build: Build) -> None:
 
 SLIDES_RASTER_HEIGHT = 512
 SLIDES_MARKS: tuple[str, ...] = ("mark-on-light", "mark-on-dark", "lockup-on-light", "lockup-on-dark")
-#: The bloom on the dark slide frames: the gradient's three stops as soft glows, each (stop, cx, cy,
-#: rx, ry, opacity) on a 1400 x 1500 canvas. A surface for nothing that must be read.
-SLIDES_BLOOM: tuple[tuple[str, int, int, int, int, float], ...] = (
-    ("blue-500", 1120, 1120, 620, 560, 0.42),
-    ("violet-500", 1320, 760, 440, 480, 0.34),
-    ("red-500", 1340, 1420, 360, 340, 0.22),
+#: What build_slides copies from slides/: these files, and the scripts in these folders. Nothing
+#: else in the working tree (installed packages, rendered decks and PDFs, editor files) is copied.
+SLIDES_FILES: tuple[str, ...] = ("SKILL.md", "package.json", "package-lock.json")
+SLIDES_SCRIPT_DIRS: tuple[str, ...] = ("lib", "bin", "example")
+
+
+@dataclass(frozen=True, slots=True)
+class Glow:
+    """One of the bloom's soft glows: a gradient stop as a radial fade on the 1400 x 1500 canvas."""
+
+    stop: str
+    cx: int
+    cy: int
+    rx: int
+    ry: int
+    opacity: float
+
+
+#: The bloom on the dark slide frames: the gradient's three stops. A surface for nothing that must be read.
+SLIDES_BLOOM: tuple[Glow, ...] = (
+    Glow("blue-500", cx=1120, cy=1120, rx=620, ry=560, opacity=0.42),
+    Glow("violet-500", cx=1320, cy=760, rx=440, ry=480, opacity=0.34),
+    Glow("red-500", cx=1340, cy=1420, rx=360, ry=340, opacity=0.22),
 )
 
 
 def slides_bloom_svg(build: Build) -> str:
     gradients: list[str] = []
     ellipses: list[str] = []
-    for index, (stop, cx, cy, rx, ry, opacity) in enumerate(SLIDES_BLOOM):
-        colour = build.tokens.resolve(f"color.primitive.{stop}", "light")
+    for index, glow in enumerate(SLIDES_BLOOM):
+        colour = build.tokens.resolve(f"color.primitive.{glow.stop}", "light")
         gradients.append(
-            f'<radialGradient id="g{index}"><stop offset="0" stop-color="{colour}" stop-opacity="{opacity}"/>'
+            f'<radialGradient id="g{index}"><stop offset="0" stop-color="{colour}" stop-opacity="{glow.opacity}"/>'
             f'<stop offset="1" stop-color="{colour}" stop-opacity="0"/></radialGradient>'
         )
-        ellipses.append(f'<ellipse cx="{cx}" cy="{cy}" rx="{rx}" ry="{ry}" fill="url(#g{index})"/>')
+        ellipses.append(f'<ellipse cx="{glow.cx}" cy="{glow.cy}" rx="{glow.rx}" ry="{glow.ry}" fill="url(#g{index})"/>')
     return (
         '<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1500" viewBox="0 0 1400 1500">'
         f"<defs>{''.join(gradients)}</defs>{''.join(ellipses)}</svg>\n"
@@ -877,28 +897,25 @@ def build_slides(build: Build) -> None:
     """The PowerPoint design system: its library from slides/, with the tag's tokens, marks and fonts."""
     out = build.out / "slides"
     source = build.root / "slides"
-    for path in sorted(source.rglob("*")):
-        rel = path.relative_to(source)
-        if path.is_file() and "node_modules" not in rel.parts and path.suffix != ".pptx":
-            copy(path, out / rel)
+    for name in SLIDES_FILES:
+        copy(source / name, out / name)
+    for directory in SLIDES_SCRIPT_DIRS:
+        for path in sorted((source / directory).glob("*.js")):
+            copy(path, out / directory / path.name)
     copy(build.root / "identity.tokens.json", out / "tokens" / "identity.tokens.json")
     write(out / "tokens" / "IDENTITY_TAG", f"{build.tag}\n")
     marks = build.root / "marks"
     (out / "assets").mkdir(parents=True, exist_ok=True)
     for name in SLIDES_MARKS:
         svg = marks / f"{name}.svg"
-        box = re.search(r'viewBox="0 0 ([\d.]+) ([\d.]+)"', svg.read_text(encoding="utf-8"))
+        box = _svg_box(svg.read_text(encoding="utf-8"))
         if box is None:
             raise BuildError(f"{svg} has no viewBox")
-        width = round(float(box.group(1)) / float(box.group(2)) * SLIDES_RASTER_HEIGHT)
+        width = round(box[0] / box[1] * SLIDES_RASTER_HEIGHT)
         rsvg_convert(svg, out / "assets" / f"{name}.png", width, SLIDES_RASTER_HEIGHT)
     copy(marks / mark.TILE_RASTER, out / "assets" / mark.TILE_RASTER)
     rasterize_text(slides_bloom_svg(build), out / "assets" / "bloom.png", 1400, 1500)
-    fonts = build.root / "fonts"
-    for path in sorted((fonts / "build").glob("*.ttf")):
-        copy(path, out / "fonts" / path.name)
-    for path in sorted(fonts.glob("LICENSE-*")):
-        copy(path, out / "fonts" / path.name)
+    copy_fonts(build, out / "fonts", fmt="ttf")
 
 
 def host_lockup(build: Build, touchpoint: Touchpoint) -> tuple[str, float, float]:
@@ -1311,9 +1328,15 @@ CONSUMERS: dict[str, str] = {
 }
 
 
-def _svg_size(text: str) -> str:
+def _svg_box(text: str) -> tuple[float, float] | None:
+    """The width and height of an SVG's viewBox, when it starts at the origin."""
     box = re.search(r'viewBox="0 0 ([\d.]+) ([\d.]+)"', text)
-    return f"{float(box.group(1)):g} by {float(box.group(2)):g} units" if box else "SVG"
+    return (float(box.group(1)), float(box.group(2))) if box else None
+
+
+def _svg_size(text: str) -> str:
+    box = _svg_box(text)
+    return f"{box[0]:g} by {box[1]:g} units" if box else "SVG"
 
 
 def build_review(build: Build) -> None:
