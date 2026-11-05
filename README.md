@@ -14,7 +14,8 @@ repository and nowhere else.
 | `fonts/` | Inter and JetBrains Mono as Latin woff2 subsets with their licences, and TTF copies the build sets text with |
 | `touchpoints.toml` | the roster: the family links, the ownership line, every host, every root README and every published package's README, their exceptions. Never a level |
 | `templates/` | the social images, the head fragment, the family links, the footer, the brand page |
-| `build.py` | source to `dist/`: `css`, `material`, `envelop`, `stytch`, `hero`, `readme`, `repo-preview`, `avatar`, `hosts`, `brand-page`, and the local contact sheet `review/` |
+| `slides/` | the PowerPoint design system's library, theme writer, check script, reference deck and skill file (Node, pptxgenjs); `build.py` adds the tag's tokens, marks and fonts |
+| `build.py` | source to `dist/`: `css`, `material`, `envelop`, `stytch`, `hero`, `readme`, `repo-preview`, `avatar`, `slides`, `hosts`, `brand-page`, and the local contact sheet `review/` |
 | `tools/` | `validate_identity.py` (the gate), `check_touchpoint.py` (the six assertions a touchpoint's CI runs), `sweep_touchpoints.py` (who is behind) |
 | `design/` | the direction comparison and the mark exploration, as PDF |
 
@@ -75,6 +76,9 @@ make install   # uv sync and the pre-commit hooks
 make check     # lint, format, pyright, the validator, the mark check
 make test      # pytest: the token file, the validator, the mark, the build, the check, the sweep
 make build     # dist/ with the contact sheet (needs rsvg-convert from librsvg on PATH)
+make slides-qa       # build and check the reference deck (needs Node and LibreOffice)
+make slides-install  # install the working tree's slides as the idfkit-slides skill
 ```
 
-Standard library only, Python 3.12.
+The build is standard library only, Python 3.12. The slides library under `slides/` is the one Node
+component; it runs in the skill, never in the build.

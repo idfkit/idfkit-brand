@@ -172,6 +172,36 @@ def test_avatar_derivation(dist: Path, root: Path) -> None:
 
 
 @needs_rsvg
+def test_slides_derivation(dist: Path, root: Path) -> None:
+    from rasters import png_size
+
+    slides = dist / "slides"
+    # The library and its documentation come from slides/ unchanged; nothing installed or built there is copied.
+    for rel in ("SKILL.md", "package.json", "package-lock.json", "lib/idfkit-slides.js", "lib/theme.js", "bin/qa.js"):
+        assert (slides / rel).read_bytes() == (root / "slides" / rel).read_bytes(), rel
+    assert not any("node_modules" in p.parts or p.suffix == ".pptx" for p in slides.rglob("*"))
+    # The tokens are the tag's file, and the tag is stamped beside them for the deck's theme name.
+    assert (slides / "tokens" / "identity.tokens.json").read_bytes() == (root / "identity.tokens.json").read_bytes()
+    assert (slides / "tokens" / "IDENTITY_TAG").read_text(encoding="utf-8") == "identity-2026.1\n"
+    for name in build_module.SLIDES_MARKS:
+        width, height = png_size((slides / "assets" / f"{name}.png").read_bytes())
+        assert height == build_module.SLIDES_RASTER_HEIGHT, name
+        assert width >= height, name
+    assert png_size((slides / "assets" / "bloom.png").read_bytes()) == (1400, 1500)
+    assert (slides / "assets" / "tile.png").exists()
+    fonts = sorted(p.name for p in (slides / "fonts").iterdir())
+    assert fonts == sorted(
+        [p.name for p in (root / "fonts" / "build").glob("*.ttf")]
+        + [p.name for p in (root / "fonts").glob("LICENSE-*")]
+    )
+    # The bloom is the gradient's three stops, read from the tokens.
+    tokens = load_tokens(root / "identity.tokens.json")
+    bloom = build_module.slides_bloom_svg(build_module.load_build(root, dist, build_module.UNRELEASED))
+    for stop, *_ in build_module.SLIDES_BLOOM:
+        assert f'stop-color="{tokens.resolve(f"color.primitive.{stop}", "light")}"' in bloom
+
+
+@needs_rsvg
 def test_hosts_derivation(dist: Path, root: Path) -> None:
     from rasters import png_size, unpack_ico
 

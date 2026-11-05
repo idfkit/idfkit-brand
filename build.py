@@ -61,6 +61,7 @@ MECHANISM_DIRS: tuple[str, ...] = (
     "readme",
     "repo-preview",
     "avatar",
+    "slides",
     "hosts",
     "brand-page",
 )
@@ -845,6 +846,61 @@ def build_avatars(build: Build) -> None:
         rsvg_convert(svg, out / f"{avatar.account}.png", AVATAR_SIZE, AVATAR_SIZE)
 
 
+SLIDES_RASTER_HEIGHT = 512
+SLIDES_MARKS: tuple[str, ...] = ("mark-on-light", "mark-on-dark", "lockup-on-light", "lockup-on-dark")
+#: The bloom on the dark slide frames: the gradient's three stops as soft glows, each (stop, cx, cy,
+#: rx, ry, opacity) on a 1400 x 1500 canvas. A surface for nothing that must be read.
+SLIDES_BLOOM: tuple[tuple[str, int, int, int, int, float], ...] = (
+    ("blue-500", 1120, 1120, 620, 560, 0.42),
+    ("violet-500", 1320, 760, 440, 480, 0.34),
+    ("red-500", 1340, 1420, 360, 340, 0.22),
+)
+
+
+def slides_bloom_svg(build: Build) -> str:
+    gradients: list[str] = []
+    ellipses: list[str] = []
+    for index, (stop, cx, cy, rx, ry, opacity) in enumerate(SLIDES_BLOOM):
+        colour = build.tokens.resolve(f"color.primitive.{stop}", "light")
+        gradients.append(
+            f'<radialGradient id="g{index}"><stop offset="0" stop-color="{colour}" stop-opacity="{opacity}"/>'
+            f'<stop offset="1" stop-color="{colour}" stop-opacity="0"/></radialGradient>'
+        )
+        ellipses.append(f'<ellipse cx="{cx}" cy="{cy}" rx="{rx}" ry="{ry}" fill="url(#g{index})"/>')
+    return (
+        '<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1500" viewBox="0 0 1400 1500">'
+        f"<defs>{''.join(gradients)}</defs>{''.join(ellipses)}</svg>\n"
+    )
+
+
+def build_slides(build: Build) -> None:
+    """The PowerPoint design system: its library from slides/, with the tag's tokens, marks and fonts."""
+    out = build.out / "slides"
+    source = build.root / "slides"
+    for path in sorted(source.rglob("*")):
+        rel = path.relative_to(source)
+        if path.is_file() and "node_modules" not in rel.parts and path.suffix != ".pptx":
+            copy(path, out / rel)
+    copy(build.root / "identity.tokens.json", out / "tokens" / "identity.tokens.json")
+    write(out / "tokens" / "IDENTITY_TAG", f"{build.tag}\n")
+    marks = build.root / "marks"
+    (out / "assets").mkdir(parents=True, exist_ok=True)
+    for name in SLIDES_MARKS:
+        svg = marks / f"{name}.svg"
+        box = re.search(r'viewBox="0 0 ([\d.]+) ([\d.]+)"', svg.read_text(encoding="utf-8"))
+        if box is None:
+            raise BuildError(f"{svg} has no viewBox")
+        width = round(float(box.group(1)) / float(box.group(2)) * SLIDES_RASTER_HEIGHT)
+        rsvg_convert(svg, out / "assets" / f"{name}.png", width, SLIDES_RASTER_HEIGHT)
+    copy(marks / mark.TILE_RASTER, out / "assets" / mark.TILE_RASTER)
+    rasterize_text(slides_bloom_svg(build), out / "assets" / "bloom.png", 1400, 1500)
+    fonts = build.root / "fonts"
+    for path in sorted((fonts / "build").glob("*.ttf")):
+        copy(path, out / "fonts" / path.name)
+    for path in sorted(fonts.glob("LICENSE-*")):
+        copy(path, out / "fonts" / path.name)
+
+
 def host_lockup(build: Build, touchpoint: Touchpoint) -> tuple[str, float, float]:
     """This host's lockup in currentColor, its name outlined, so every host draws the same geometry."""
     name = touchpoint.property_name
@@ -1438,6 +1494,7 @@ def run(build: Build, with_archive: bool = False) -> None:
     build_readme(build)
     build_repo_previews(build)
     build_avatars(build)
+    build_slides(build)
     build_hosts(build)
     build_brand_page(build, measure_pairs(build.tokens))
     build_review(build)
