@@ -3,6 +3,10 @@
 dist/
 sweep-report.json
 
+# Node, for the slides derivation's library
+node_modules/
+*.pptx
+
 # Python
 __pycache__/
 *.py[codz]

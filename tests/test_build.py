@@ -172,6 +172,43 @@ def test_avatar_derivation(dist: Path, root: Path) -> None:
 
 
 @needs_rsvg
+def test_slides_derivation(dist: Path, root: Path) -> None:
+    from rasters import png_size
+
+    slides = dist / "slides"
+    # The library and its documentation come from slides/ unchanged, and nothing else there is copied.
+    sources = [*build_module.SLIDES_FILES] + [
+        f"{directory}/{p.name}"
+        for directory in build_module.SLIDES_SCRIPT_DIRS
+        for p in (root / "slides" / directory).glob("*.js")
+    ]
+    assert "lib/idfkit-slides.js" in sources and "bin/qa.js" in sources and "example/build_example.js" in sources
+    for rel in sources:
+        assert (slides / rel).read_bytes() == (root / "slides" / rel).read_bytes(), rel
+    copied = {p.relative_to(slides).as_posix() for p in slides.rglob("*") if p.is_file()}
+    assert {rel for rel in copied if rel.split("/")[0] not in ("tokens", "assets", "fonts")} == set(sources)
+    # The tokens are the tag's file, and the tag is stamped beside them for the deck's theme name.
+    assert (slides / "tokens" / "identity.tokens.json").read_bytes() == (root / "identity.tokens.json").read_bytes()
+    assert (slides / "tokens" / "IDENTITY_TAG").read_text(encoding="utf-8") == "identity-2026.1\n"
+    for name in build_module.SLIDES_MARKS:
+        width, height = png_size((slides / "assets" / f"{name}.png").read_bytes())
+        assert height == build_module.SLIDES_RASTER_HEIGHT, name
+        assert width >= height, name
+    assert png_size((slides / "assets" / "bloom.png").read_bytes()) == (1400, 1500)
+    assert (slides / "assets" / "tile.png").exists()
+    fonts = sorted(p.name for p in (slides / "fonts").iterdir())
+    assert fonts == sorted(
+        [p.name for p in (root / "fonts" / "build").glob("*.ttf")]
+        + [p.name for p in (root / "fonts").glob("LICENSE-*")]
+    )
+    # The bloom is the gradient's three stops, read from the tokens.
+    tokens = load_tokens(root / "identity.tokens.json")
+    bloom = build_module.slides_bloom_svg(build_module.load_build(root, dist, build_module.UNRELEASED))
+    for glow in build_module.SLIDES_BLOOM:
+        assert f'stop-color="{tokens.resolve(f"color.primitive.{glow.stop}", "light")}"' in bloom
+
+
+@needs_rsvg
 def test_hosts_derivation(dist: Path, root: Path) -> None:
     from rasters import png_size, unpack_ico
 

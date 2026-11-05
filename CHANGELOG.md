@@ -7,6 +7,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- `dist/slides/`, the PowerPoint design system as a Claude Code skill: a pptxgenjs library with the
+  title, divider and content frames and their components, a theme writer that puts the identity's
+  colours into each deck, a check script that renders a deck to PDF with the standard's fonts, a
+  reference deck, and the tag's tokens, marks, bloom and TTF fonts. Its source is `slides/`; each
+  release attaches it as `slides.tar.gz`. `make slides-qa` builds and checks the reference deck, and
+  `make slides-install` installs the working tree's build as the `idfkit-slides` skill.
+- `tools/validate_identity.py` scans the slides library's scripts for colour and font literals, as it
+  scans the templates, since the library reads every value from the token file.
+
 ## [identity-2026.5] - 2026-11-04
 
 The brand page becomes a site of its own at brand.idfkit.com, and the standard derives the profile
