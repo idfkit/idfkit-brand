@@ -13,9 +13,11 @@ repository and nowhere else.
 | `mark.py`, `marks/` | the mark's geometry and the SVG masters generated from it; `marks/wordmark.svg` is the one outlined, committed master |
 | `fonts/` | Inter and JetBrains Mono as Latin woff2 subsets with their licences, and TTF copies the build sets text with |
 | `touchpoints.toml` | the roster: the family links, the ownership line, every host, every root README and every published package's README, their exceptions. Never a level |
-| `templates/` | the social images, the head fragment, the family links, the footer, the brand page |
+| `templates/` | the social images, the head fragment, the family links, the footer, the attribution line, the web manifest, the brand page |
 | `build.py` | source to `dist/`: `css`, `material`, `envelop`, `stytch`, `hero`, `readme`, `repo-preview`, `avatar`, `hosts`, `brand-page`, and the local contact sheet `review/` |
-| `tools/` | `validate_identity.py` (the gate), `check_touchpoint.py` (the six assertions a touchpoint's CI runs), `sweep_touchpoints.py` (who is behind) |
+| `providers/` | `stytch-styles.json`, the sign-in provider's widget style schema that `build.py` resolves into `dist/stytch/` |
+| `tools/` | `validate_identity.py` (the gate), `check_touchpoint.py` (the six assertions a touchpoint's CI runs), `sweep_touchpoints.py` (who is behind), and the modules they share: `models.py` (typed records for the token file and the roster), `glyphs.py` (text set as outlines), `rasters.py` (PNG and ICO decoding, pixel comparison) |
+| `tests/` | the pytest suite `make test` runs |
 | `design/` | the direction comparison and the mark exploration, as PDF |
 
 The contracts that fix each of these are in the planning repository, under
@@ -34,7 +36,9 @@ The contracts that fix each of these are in the planning repository, under
 3. Run `make build` and open `dist/review/index.html`, the contact sheet of every image produced,
    on the light ground and the dark ground. The owner reviews it before any tag that changes a
    template or a mark.
-4. Open a pull request. The owner reviews the source files (`.github/CODEOWNERS`).
+4. Open a pull request. The owner reviews changes to `identity.tokens.json`, `mark.py`, `marks/`,
+   `touchpoints.toml` and `templates/` (`.github/CODEOWNERS`); no code owner is assigned to the
+   other paths.
 
 Nothing reaches a touchpoint until the change is tagged.
 
@@ -44,11 +48,12 @@ Tags are `identity-YYYY.N`: the next number within the year, the year resetting 
 the merged commit on `main`, with `identity.yml` green:
 
 ```bash
-git tag identity-2026.1 && git push origin identity-2026.1
+git tag identity-YYYY.N && git push origin identity-YYYY.N
 ```
 
 `identity.yml` builds `dist/` at the tag and creates the GitHub release with one archive per
-mechanism directory and the six images attached loose for download. A README addresses the masters
+mechanism directory and the six images attached loose for download, then deploys the brand page
+from that build to brand.idfkit.com through GitHub Pages. A README addresses the masters
 in `marks/` at the tag instead, since a browser will not display an SVG served as a release asset. A
 tag never moves once a touchpoint declares it; a mistake is a new tag.
 
@@ -63,10 +68,15 @@ Adoption is a procedure the maintainer runs through an agent, not a script in th
 - **`identity-sweep`** (`.claude/skills/identity-sweep/`): reads every touchpoint's declared tag
   from its own checkout and reports who is behind, with the stated lag or `unexplained`.
 
-Both are offered whenever the workspace is open. The only code a touchpoint runs is the check: its
+Both are project skills of this repository, so they are offered to an agent session whose working
+directory is this checkout. The only code a touchpoint runs is the check: its
 `.github/workflows/check-identity.yml` calls `check-touchpoint.yml` from this repository at the
-tag it declares, which fails when a vendored file differs from the tag's, when its own stylesheet
-carries a stray colour or font literal, or when a README's header departs from the contract.
+tag it declares. The check runs six assertions (`tools/check_touchpoint.py`) and fails when the
+repository is missing from the roster or exhibits other mechanisms than it records, when the
+declared level does not resolve, differs from the tag checked or names no tag, when a vendored file
+differs from the tag's, when an identity-bearing file carries a stray colour, font family, font face
+or font host, when a README's header departs from the contract, or when a host does not load its
+generated `lockup.css` from the file the roster names or draws the mark by hand.
 
 ## 5. Development
 
