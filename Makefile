@@ -26,6 +26,22 @@ test: ## Test the code with pytest
 build: ## Build every derivation into dist/, with the local contact sheet
 	@uv run python build.py --out dist
 
+SLIDES_HOME ?= $(HOME)/.claude/skills/idfkit-slides
+SLIDES_QA := dist/slides-qa
+
+.PHONY: slides-qa
+slides-qa: build ## Build the reference deck from dist/slides/ and check it (needs Node and LibreOffice)
+	@cd dist/slides && npm ci --silent
+	@node dist/slides/example/build_example.js $(SLIDES_QA)/idfkit-slides-reference.pptx
+	@node dist/slides/bin/qa.js $(SLIDES_QA)/idfkit-slides-reference.pptx
+
+.PHONY: slides-install
+slides-install: build ## Copy dist/slides/ over the idfkit-slides skill in SLIDES_HOME (needs Node)
+	@mkdir -p "$(SLIDES_HOME)"
+	@cp -R dist/slides/. "$(SLIDES_HOME)/"
+	@cd "$(SLIDES_HOME)" && npm ci --silent
+	@echo "Installed idfkit-slides at $$(cat "$(SLIDES_HOME)/tokens/IDENTITY_TAG") into $(SLIDES_HOME)"
+
 .PHONY: help
 help:
 	@uv run python -c "import re; \

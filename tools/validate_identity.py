@@ -7,7 +7,8 @@ to call the standard well formed (data-model, Standard, rule 1). What it checks,
   2. Every role alias resolves to a primitive.
   3. Every Pair (an ink role on each ground its `on` lists) meets its `minContrast` in both themes,
      by WCAG 2.1 relative luminance (FR-015, SC-006).
-  4. Every template under templates/ is free of colour and font literals.
+  4. Every template under templates/, and every script of the slides library under slides/, is free
+     of colour and font literals.
   5. `touchpoints.toml` obeys the roster rules of contracts/touchpoint-check.md section 1.
   6. The committed masters under marks/ equal what mark.py writes, and mark.py's fixed inks are
      the token file's.
@@ -45,6 +46,11 @@ FONT_LITERAL = re.compile(
     r"""(?:font-family\s*[:=]\s*["']?\s*(?!var\(|\{\{|inherit|initial|unset)[A-Za-z])|@font-face|fonts\.googleapis\.com|fonts\.gstatic\.com"""
 )
 TEMPLATE_SUFFIXES = (".svg", ".html", ".css", ".webmanifest", ".yml", ".json", ".js", ".md")
+#: What the slides library may not carry (derivations.md, dist/slides/): a colour as pptxgenjs takes
+#: it, six hex digits in quotes, or a font face named in a string rather than a theme font reference.
+SLIDES_COLOR_LITERAL = re.compile(r"""["'][0-9a-fA-F]{6}["']""")
+SLIDES_FONT_LITERAL = re.compile(r"""[fF]ontFace\s*:\s*["'](?!\+m[jn]-lt["'])""")
+SLIDES_SCRIPT_DIRS = ("lib", "bin", "example")
 
 
 @dataclass(frozen=True, slots=True)
@@ -147,27 +153,46 @@ def check_pairs(results: Iterable[PairResult]) -> list[Finding]:
     ]
 
 
+def _first_literal(
+    path: Path, root: Path, check: str, patterns: Iterable[tuple[re.Pattern[str], str]]
+) -> Finding | None:
+    """The first line of `path` carrying a literal, as one finding per file."""
+    for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+        for pattern, kind in patterns:
+            match = pattern.search(line)
+            if match:
+                return Finding(check, f"{path.relative_to(root)}:{number}", f"{kind} literal {match.group(0)!r}")
+    return None
+
+
 def check_templates(root: Path) -> list[Finding]:
     """A literal in a template is a validation failure: templates read tokens by name."""
-    findings: list[Finding] = []
     templates = root / "templates"
     if not templates.is_dir():
         return [Finding("templates", str(templates), "missing")]
-    for path in sorted(p for p in templates.rglob("*") if p.is_file() and p.suffix in TEMPLATE_SUFFIXES):
-        for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
-            color = COLOR_LITERAL.search(line)
-            if color:
-                findings.append(
-                    Finding("templates", f"{path.relative_to(root)}:{number}", f"colour literal {color.group(0)!r}")
-                )
-                break
-            font = FONT_LITERAL.search(line)
-            if font:
-                findings.append(
-                    Finding("templates", f"{path.relative_to(root)}:{number}", f"font literal {font.group(0)!r}")
-                )
-                break
-    return findings
+    patterns = ((COLOR_LITERAL, "colour"), (FONT_LITERAL, "font"))
+    found = (
+        _first_literal(path, root, "templates", patterns)
+        for path in sorted(p for p in templates.rglob("*") if p.is_file() and p.suffix in TEMPLATE_SUFFIXES)
+    )
+    return [finding for finding in found if finding is not None]
+
+
+def check_slides(root: Path) -> list[Finding]:
+    """The slides library reads the token file at run time, so a colour or a font named in its scripts fails."""
+    slides = root / "slides"
+    patterns = (
+        (COLOR_LITERAL, "colour"),
+        (SLIDES_COLOR_LITERAL, "colour"),
+        (FONT_LITERAL, "font"),
+        (SLIDES_FONT_LITERAL, "font"),
+    )
+    found = (
+        _first_literal(path, root, "slides", patterns)
+        for directory in SLIDES_SCRIPT_DIRS
+        for path in sorted((slides / directory).glob("*.js"))
+    )
+    return [finding for finding in found if finding is not None]
 
 
 def check_roster(root: Path) -> list[Finding]:
@@ -251,6 +276,7 @@ def validate(root: Path) -> Report:
         pairs = measure_pairs(tokens)
         findings += check_pairs(pairs)
     findings += check_templates(root)
+    findings += check_slides(root)
     findings += check_roster(root)
     try:
         findings += check_marks(root, tokens)
